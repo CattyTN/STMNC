@@ -1,0 +1,206 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Tables {% endblock %} 
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+<style>
+table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+thead th,
+tbody td {
+  text-align: center !important; /* Căn giữa ngang */
+  vertical-align: middle;        /* Căn giữa dọc */
+  font-size: 12px;
+}
+
+
+
+.modal-body input, 
+.modal-body textarea, 
+.modal-body select {
+  color: black !important;  /* Đảm bảo chữ có màu đen */
+  background-color: white !important;  /* Giữ nền trắng */
+}
+  
+.modal-body label {
+  color: black !important; /* Đảm bảo nhãn có màu đen */
+}
+
+</style>
+{% endblock stylesheets %}
+
+{% block content %}
+
+  <div class="content">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card ">
+          <div class="card-header d-flex align-items-center justify-content-between">
+            <h4 class="card-title"><strong> CƠ SỞ DỮ LIỆU MỐI ĐE DỌA</strong></h4>
+            <label class="btn btn-sm btn-default active" id="0">
+              <span class="d-none d-sm-block d-md-block d-lg-block d-xl-block" data-toggle="modal" data-target="#customModal">Thêm mới</span>
+          </label>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive overflow-auto">
+              <table class="table tablesorter align-items-center" id="">
+                <thead class="text-primary">
+                  <tr>
+                    <th scope="col" class="sort col-3" >IOC</th>
+                    <th scope="col" class="sort col-3">TỔ CHỨC BÁO CÁO</th>
+                    <th scope="col" class="sort col-3">LOẠI MỐI ĐE DỌA</th>
+                    <th scope="col" class="sort col-3">TRẠNG THÁI</th>
+                  </tr>
+                </thead>
+                <tbody id="table-body">
+                  {% for index, row in indicator.iterrows() %}
+                  <tr>
+                    <td scope="col" class="sort col-2" style="font-size: 12px;">{{ row['url'] }}</td>
+                    <td scope="col" class="sort col-4" style="font-size: 12px;">{{ row['Reporter'] }}</td>
+                    <td scope="col" class="sort col-3" style="font-size: 12px;">{{ row['Threat'] }}</td>
+                    <td scope="col" class="sort col-2" style="font-size: 12px;">{{ row['Status'] }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="card-footer py-4">
+            <nav aria-label="...">
+              <ul class="pagination justify-content-end mb-0">
+                <li class="page-item disabled">
+                  <a class="page-link" href="#" tabindex="-1">
+                    <i class="fas fa-angle-left"></i>
+                    <span class="sr-only">Previous</span>
+                  </a>
+                </li>
+                <ul class="pagination justify-content-end mb-0">
+                  {% if current_page == 1 %}
+                      <li class="page-item active"><a class="page-link" style="color:black;" href="#" id ='page_1'>1</a></li>
+                      {% if total_pages > 1 %}<li class="page-item"><a class="page-link" style="color:black;" href="#" id ='page_2'>2</a></li>{% endif %}
+                      {% if total_pages > 3 %}<li class="page-item disabled"><a class="page-link" style="color:black;">...</a></li>{% endif %}
+                      <li class="page-item"><a class="page-link" style="color:black;" href="#" id="page_{{ total_pages }}">{{ total_pages }}</a></li>
+              
+                  {% elif current_page == 2 %}
+                      <li class="page-item"><a class="page-link" style="color:black;" href="#" id ='page_1'>1</a></li>
+                      <li class="page-item active"><a class="page-link" style="color:black;" href="#" id ='page_2'>2</a></li>
+                      {% if total_pages > 2 %}<li class="page-item"><a class="page-link" style="color:black;" href="#" id ='page_3'>3</a></li>{% endif %}
+                      {% if total_pages > 4 %}<li class="page-item disabled"><a class="page-link" style="color:black;">...</a></li>{% endif %}
+                      <li class="page-item"><a class="page-link" style="color:black;" href="#" id="page_{{ total_pages }}">{{ total_pages }}</a></li>
+              
+                  {% elif current_page == 3 %}
+                      <li class="page-item"><a class="page-link" style="color:black;" href="#" id ='page_1'>1</a></li>
+                      <li class="page-item"><a class="page-link" style="color:black;" href="#" id ='page_2'>2</a></li>
+                      <li class="page-item active"><a class="page-link" style="color:black;" href="#" id ='page_3'>3</a></li>
+                      {% if total_pages > 3 %}<li class="page-item"><a class="page-link" style="color:black;" href="#" id ='page_4'>4</a></li>{% endif %}
+                      {% if total_pages > 5 %}<li class="page-item disabled"><a class="page-link" style="color:black;">...</a></li>{% endif %}
+                      <li class="page-item"><a class="page-link" style="color:black;" href="#" id="page_{{ total_pages }}">{{ total_pages }}</a></li>
+              
+                  {% elif ((current_page > 3) and (current_page < (total_pages - 1)))  %}
+                      <li class="page-item"><a class="page-link" style="color:black;" href="#" id ='page_1'>1</a></li>
+                      <li class="page-item disabled"><a class="page-link" style="color:black;">...</a></li>
+                      <li class="page-item"><a class="page-link" style="color:black;" href="#" id="page_{{ current_page - 1 }}">{{ current_page - 1 }}</a></li>
+                      <li class="page-item active"><a class="page-link" style="color:black;" href="#" id="page_{{ current_page }}">{{ current_page }}</a></li>
+               	      <li class="page-item"><a class="page-link" style="color:black;" href="#" id="page_{{ current_page + 1 }}">{{ current_page + 1 }}</a></li>
+                      <li class="page-item disabled"><a class="page-link" style="color:black;">...</a></li>
+                      <li class="page-item"><a class="page-link" style="color:black;" href="#" id="page_{{ total_pages }}">{{ total_pages }}</a></li>
+                  {% elif (current_page == (total_pages - 1))  %}
+                      <li class="page-item"><a class="page-link" style="color:black;" href="#" id ='page_1'>1</a></li>
+                      <li class="page-item disabled"><a class="page-link" style="color:black;">...</a></li>
+                      <li class="page-item"><a class="page-link" style="color:black;" href="#" id="page_{{ current_page - 1 }}">{{ current_page - 1 }}</a></li>
+                      <li class="page-item active"><a class="page-link" style="color:black;" href="#" id="page_{{ current_page }}">{{ current_page }}</a></li>
+                      <li class="page-item"><a class="page-link" style="color:black;" href="#" id="page_{{ total_pages }}">{{ total_pages }}</a></li>
+                  {% elif current_page == total_pages   %}
+                      <li class="page-item"><a class="page-link" style="color:black;" href="#" id ='page_1'>1</a></li>
+                      <li class="page-item disabled"><a class="page-link" style="color:black;">...</a></li>
+                      <li class="page-item"><a class="page-link" style="color:black;" href="#" id="page_{{ current_page - 1 }}">{{ current_page - 1 }}</a></li>
+                      <li class="page-item active"><a class="page-link " style="color:black;" href="#" id="page_{{ total_pages }}">{{ total_pages }}</a></li>
+                  {% endif %}
+
+              </ul>
+                <li class="page-item disabled">
+                  <a class="page-link" href="#">
+                    <i class="fas fa-angle-right"></i>
+                    <span class="sr-only">Next</span>
+                  </a>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  
+  <div class="modal fade" id="customModal" tabindex="-1" role="dialog" aria-labelledby="customModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="customModalLabel">THÊM MỚI MỐI ĐE DỌA</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span >&times;</span>
+          </button>
+        </div>
+        <div class="modal-body " >
+          <form>
+            <div class="form-group">
+              <label for="id-input" class="col-form-label">ID</label>
+              <input type="text" class="form-control" id="id-input">
+            </div>
+            <div class="form-group">
+              <label for="url-input" class="col-form-label">C&C</label>
+              <input type="text" class="form-control" id="url-input">
+            </div>
+            <div class="form-group">
+              <label for="description-input" class="col-form-label">Mô tả</label>
+              <input type="text" class="form-control" id="description-input">
+            </div>
+            <div class="form-group">
+              <label for="status-select" class="col-form-label">Trạng thái</label>
+              <select class="form-control" id="status-select">
+                <option value="online">Online</option>
+                <option value="offline">Offline</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="threat-select" class="col-form-label">Mối đe dọa</label>
+              <select class="form-control" id="threat-select">
+                <option value="malware_download">Malware Download</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="pattern-input" class="col-form-label">Pattern</label>
+              <input type="text" class="form-control" id="pattern-input">
+            </div>
+            <div class="form-group">
+              <label for="valid-from" class="col-form-label">Hợp lệ từ</label>
+              <input type="date" class="form-control" id="valid-from">
+            </div>
+            <div class="form-group">
+              <label for="valid-until" class="col-form-label">Hợp lệ đến</label>
+              <input type="date" class="form-control" id="valid-until">
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+          <button type="button" id="add_ioc_button" class="btn btn-primary">Cập nhật</button>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+
+
+
+{% endblock javascripts %}

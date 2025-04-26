@@ -1,0 +1,60 @@
+
+    <div class="sidebar">
+        <!--
+          Tip 1: You can change the color of the sidebar using: data-color="blue | green | orange | red"
+      -->
+        <div class="sidebar-wrapper" >
+            <div class="logo">
+                <a href="#" class="simple-text logo-mini" style="color: black;">
+                    HT
+                </a>
+                <a href="#" class="simple-text logo-normal" style="color: black;">
+                    SĂN TÌM MỐI NGUY CƠ
+                </a>
+            </div>
+            <ul class="nav">
+                <li class="{% if 'index' in segment %} active {% endif %} ">
+                    <a href="/index">
+                        <i class="tim-icons icon-chart-pie-36" style="color: black;"></i>
+                        <p  style="color: black;"><strong>Trang chủ</strong></p>
+                    </a>
+                </li>
+                <li class="{% if 'user' in segment %} active {% endif %}">
+                    <a href="/ioc">
+                        <i class="tim-icons icon-align-center" style="color: black;"></i>
+                        <p  style="color: black;"><strong>cơ sở dữ liệu</strong></p>
+                    </a>
+                </li>
+                <li class="{% if 'tables' in segment %} active {% endif %}">
+                    <a href="/monitor">
+                        <i class="tim-icons icon-puzzle-10" style="color: black;"></i>
+                        <p  style="color: black;"><strong>Giám sát</strong></p>
+                    </a>
+                </li>
+                <li class="{% if 'tables' in segment %} active {% endif %}" >
+                    <a href="/user_managerment">
+                        <i class="tim-icons icon-single-02" style="color: black;"></i>
+                        <p  style="color: black;"><strong>Quản lý người dùng</strong></p>
+                    </a>
+                </li>
+                <li class="{% if 'tables' in segment %} active {% endif %}" >
+                    <a href="/chart">
+                        <i class="tim-icons icon-single-02" style="color: black;"></i>
+                        <p  style="color: black;"><strong>Trực quan hóa</strong></p>
+                    </a>
+                </li>
+                <li class="{% if 'tables' in segment %} active {% endif %}" >
+                    <a href="/search_and_backup">
+                        <i class="tim-icons icon-single-02" style="color: black;"></i>
+                        <p  style="color: black;"><strong>Tìm kiếm và sao lưu</strong></p>
+                    </a>
+                </li>
+                <li>
+                    <a href="/">
+                        <i class="tim-icons icon-button-power" style="color: black;"></i>
+                        <p class="fw-bold" style="color: black;"><strong>Đăng xuất</strong></p>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>

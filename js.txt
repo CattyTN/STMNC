@@ -1,0 +1,58 @@
+<script>
+  let currentPage = 1;
+  const perPage = 10;
+  
+  // Nhận totalPages từ backend
+  const totalPages = JSON.parse(`{{ total_pages | tojson | safe }}`);
+  console.log("Total pages:", totalPages);
+
+  function fetchData(page) {
+      fetch(`/get_ioc?page=${page}`)
+          .then(response => response.json())
+          .then(data => {
+              renderTable(data.indicator);
+              renderPagination(page, data.total_pages); // Cập nhật total_pages theo API
+          })
+          .catch(error => console.error("Lỗi khi lấy dữ liệu:", error));
+  }
+
+  function renderTable(data) {
+      let tableBody = document.getElementById("table-body");
+      tableBody.innerHTML = "";
+      data.forEach(row => {
+          let tr = `<tr>
+              <th scope="col" class="sort col-3">${row.id}</td>
+              <th scope="col" class="sort col-2">${row.url}</td>
+              <th scope="col" class="sort col-3">${row.Threat}</td>
+              <th scope="col" class="sort col-2">${row.Reporter}</td>
+              <th scope="col" class="sort col-2">${row.Status}</td>
+          </tr>`;
+          tableBody.innerHTML += tr;
+      });
+  }
+
+  function renderPagination(currentPage, totalPages) {
+      let pagination = document.getElementById("pagination");
+      pagination.innerHTML = "";
+
+      function pageItem(page, active = false) {
+          return `<li class="page-item ${active ? 'active' : ''}">
+                      <a class="page-link" href="#" onclick="fetchData(${page})">${page}</a>
+                  </li>`;
+      }
+
+      pagination.innerHTML += pageItem(1, currentPage === 1);
+      if (currentPage > 3) pagination.innerHTML += `<li class="page-item disabled"><a class="page-link">...</a></li>`;
+
+      for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
+          pagination.innerHTML += pageItem(i, currentPage === i);
+      }
+
+      if (currentPage < totalPages - 2) pagination.innerHTML += `<li class="page-item disabled"><a class="page-link">...</a></li>`;
+      if (totalPages > 1) pagination.innerHTML += pageItem(totalPages, currentPage === totalPages);
+  }
+
+  document.addEventListener("DOMContentLoaded", function() {
+      fetchData(1);
+  });
+</script>

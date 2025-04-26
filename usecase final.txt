@@ -1,0 +1,122 @@
+1. Đối chiếu và phân loại cảnh báo
+- Trích xuất thông tin quan trọng từ dữ liệu  thu thập được.
+- So khớp dữ liệu thu thập được với cơ sở dữ liệu địa chỉ máy chủ.
+- Gán nhãn cho dữ liệu dựa trên kết quả so sánh.
+- Hiển thị cảnh báo.
+
+2. Sao lưu dữ liệu
+- Sao lưu dữ liệu định kỳ 
+- Xuất file sao lưu
+- Nhập dữ liệu từ file sao lưu
+- Tìm kiếm, trích xuất dữ liệu
+- Cập nhật cơ sở dữ liệu địa chỉ máy chủ.
+
+3.Quản lý đăng nhập
+- Phân quyền người dùng
+- Quản lý cơ sở dữ liệu người dùng.
+- Mã hóa dữ liệu đăng nhập.
+- Quản lý phiên đăng nhập.
+- Đổi mật khẩu.
+
+4. Thu thập dữ liệu 
+- Thiết lập kết nối tới máy chủ lưu trữ cơ sở dữ liệu FMS.
+- Trích xuất dữ liệu 
+- Khởi tạo bộ nhớ tạm để lưu trữ dữ liệu.
+- Quản lý dữ liệu thu thập.
+5. Quản lý địa chỉ máy chủ.
+- Thêm địa chỉ máy chủ.
+- Sửa thông tin địa chỉ máy chủ
+- Xóa địa chỉ máy chủ
+
+6. Trực quan hóa dữ liệu
+- Biểu diễn dữ liệu dưới dạng biểu đồ.
+- Biểu diễn dữ liệu dưới dạng bảng.
+- Biểu diễn tình trạng an toàn thông tin theo thời gian.
+
+7. Thống kê báo cáo
+- Thống kê theo nhóm hành vi.
+- Thống kê theo khoảng thời gian.
+- Thống kê theo từng máy tính.
+- Thống kê theo từng đơn vị. 
+- Xuất báo cáo theo định dạng PDF/Excel.
+
+
+-------------------
+
+PT 1
+1 Điều tra thông tin về IOC
+Kích hoạt chức năng giám sát
+Hiển thị danh sách log giám sát
+Chọn IOC để xem chi tiết
+Truy xuất thông tin máy nghi ngờ
+Truy xuất thông tin IOC
+Truy xuất thông tin chiến dịch liên quan
+Truy xuất thông tin mã độc liên quan
+Hiển thị thông tin chi tiết về IOC
+
+
+TB 8
+1. Đối chiếu và phân loại cảnh báo
+1. Trích xuất địa chỉ máy chủ
+2. So khớp IOC với danh sách địa chỉ lành tính
+3. So khớp IOC với danh sách địa chỉ độc hại
+4. Gán nhãn phân loại cảnh báo mới
+5. Cập nhật giao diện hiển thị
+
+2. Thu thập dữ liệu
+1. Khởi tạo kết nối đến FMS
+2. Truy xuất dữ liệu log từ cơ sở dữ liệu
+3. Định dạng dữ liệu
+4. Ghi dữ liệu vào bộ nhớ tạm
+5. Cập nhật thông số hệ thống
+
+
+3. Sao lưu dữ liệu 
+1. Truy cập trang sao lưu
+2. Chọn Xuất dữ liệu thành file
+3. Xác nhận, trích xuất dữ liệu
+4. Xuất file lưu trữ ngoại tuyến
+
+4. Nhập dữ liệu từ file 
+1. Truy cập trang sao lưu
+2. Chọn Nhập dữ liệu từ file
+3. Nhập, đồng bộ dữ liệu
+4. Hiển thị dữ liệu được nhập từ file
+
+5. Thêm mới người dùng 
+1. Truy cập trang quản lý người dùng
+2. Chọn tính năng Thêm mới
+3. Gửi yêu cầu thêm người dùng mới
+4. Cập nhật danh sách người dùng
+
+6. Thêm mới địa chỉ máy chủ 
+1. Truy cập trang quản lý địa chỉ máy chủ
+2. Chọn tính năng Thêm mới địa chỉ máy chủ
+3. Gửi yêu cầu thêm địa chỉ mới
+4. Cập nhật danh sách máy chủ
+
+7. Thống kê báo cáo 
+1. Truy cập trang thống kê
+2. Chọn khoảng thời gian thống kê
+3. Chọn xuất báo cáo thống kê
+4. Xuất báo cáo thành file
+
+8. Tìm kiếm cảnh báo theo thời gian
+1. Truy cập trang giám sát
+2. Chọn khoảng thời gian muốn tìm kiếm
+3. Gửi yêu cầu truy vấn
+4. Hiển thị danh sách cảnh báo
+
+Đơn giản 3
+1. Xóa địa chỉ máy chủ
+1. Truy cập trang quản lý địa chỉ máy chủ
+2. Gửi yêu cầu xóa địa chỉ máy chủ
+3. Cập nhật danh sách máy chủ
+2. Xóa người dùng
+1. Truy cập trang quản lý người dùng
+2. Gửi yêu cầu xóa người dùng
+3. Cập nhật danh sách người dùng
+3. Trực quan hóa dữ liệu 
+1. Truy cập trang trực quan hóa
+2. Phân tích mối liên kết
+3. Hiển thị biểu đồ
