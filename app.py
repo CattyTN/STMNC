@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, flash
 from flask import jsonify
+from flask import session
 import pandas as pd
 import time
 import json
@@ -264,15 +265,30 @@ def add_ioc():
     return jsonify({"success": True, "message": "Thêm mới mối đe dọa thành công!"})
         
 
-
+@app.route('/reset_search', methods=['POST'])
+@login_required
+def reset_search():
+    session.pop('search_mode', None)
+    return '', 204
 
 
 @app.route('/monitor', methods=['GET', 'POST'])
 @login_required
 def monitor():
-    records = get_record()
+    if session.get('search_mode'):
+        # Truy vấn bản ghi mới nhất theo user_id
+        record = search_history_collection.find_one(
+            {"user_id": current_user.id},
+            sort=[("_id", -1)]  # bản mới nhất
+        )
+        if record and "data" in record:
+            records = pd.DataFrame(record["data"])
+        else:
+            records = pd.DataFrame()
+    else:
+        records = get_record()
+
     records = records.fillna("N/A").replace("", "N/A")
-    indicator_json = records.to_dict(orient='records')
     total_pages = (len(records) + 7) // 7
     first_page_data = records.iloc[:7]
     a = len(records)
@@ -281,11 +297,22 @@ def monitor():
 @app.route('/monitor_page', methods=['GET', 'POST'])
 @login_required
 def monitor_page():
-    current_page = int(request.args.get("page", 1))  
-    print(current_page)
-    records = get_record()
-    records = records.fillna("N/A").replace("", "N/A")
+    current_page = int(request.args.get("page", 1))
 
+    if session.get('search_mode'):
+        # Truy vấn bản ghi mới nhất theo user_id
+        record = search_history_collection.find_one(
+            {"user_id": current_user.id},
+            sort=[("_id", -1)]  # bản mới nhất
+        )
+        if record and "data" in record:
+            records = pd.DataFrame(record["data"])
+        else:
+            records = pd.DataFrame()
+    else:
+        records = get_record()
+
+    records = records.fillna("N/A").replace("", "N/A")
     total_pages = (len(records) + 7) // 7 
     start = (current_page - 1) * 7  
     end = start + 7 
@@ -636,6 +663,7 @@ def update_list():
 @app.route('/search_history', methods=['GET', 'POST'])
 @login_required
 def search_history():
+
     date_1 = request.form.get('date_1')
     date_2 = request.form.get('date_2')
 
@@ -661,6 +689,7 @@ def search_history():
     rule = df_white_list['ip'].tolist()
     df_filtered = filtering_2(df, rule)
     df_filtered_2 = match_miav_database(df_filtered)
+    session['search_mode'] = True
     #print(df_filtered_2)
     #update_other_parameter(len(df), 'query')
     #update_chart_parameter(df_filtered)
