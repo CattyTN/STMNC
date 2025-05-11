@@ -34,6 +34,8 @@ ram_2_collection = db['ram_2']
 indicator_collection = db['indicator']
 white_list_collection = db['white_list']
 search_and_backup_collection = db["search_and_backup"]
+miav_database_collection = db["miav_database"]
+search_history_collection = db["search_history"]
 
 indicator_collection = db["indicator"]
 relationship_collection = db["relationship"]
@@ -70,13 +72,28 @@ def get_record():
         df.drop(columns=["_id"], inplace=True)
     return df
 
-def get_search_and_backup():
-    search_and_backup_data = list(search_and_backup_collection.find())
-    df = pd.DataFrame(search_and_backup_data)
+def get_miav_database():
+    miav_data = list(miav_database_collection.find())
+    df = pd.DataFrame(miav_data)
     if "_id" in df.columns:
         df.drop(columns=["_id"], inplace=True)
     return df
 
+#def get_search_and_backup():
+#    search_and_backup_data = list(search_and_backup_collection.find())
+#    df = pd.DataFrame(search_and_backup_data)
+#    if "_id" in df.columns:
+#        df.drop(columns=["_id"], inplace=True)
+#    return df
+def get_search_and_backup():
+    user_id = current_user.id
+    doc = search_and_backup_collection.find_one({"user_id": user_id})
+    
+    if not doc or "searched_data" not in doc:
+        return pd.DataFrame([])  # không có dữ liệu
+
+    df = pd.DataFrame(doc["searched_data"])
+    return df
 
 
 def get_indicator():
@@ -406,14 +423,40 @@ def search_keyword():
     data = request.get_json()
     keyword = data.get('keyword', '').lower()
 
-    df = get_search_and_backup()  
+    # Lấy document của người dùng hiện tại
+    record = search_and_backup_collection.find_one({"user_id": current_user.id})
 
+    if not record or "data" not in record:
+        return jsonify({"success": False, "message": "Không tìm thấy dữ liệu để tìm kiếm."}), 404
+
+    # Tìm kiếm trong 'data' gốc
+    df = pd.DataFrame(record["data"])
     mask = df.apply(lambda row: row.astype(str).str.lower().str.contains(keyword).any(), axis=1)
     filtered_df = df[mask]
-    if (len(filtered_df) > 0):
-        overwrite_collection(filtered_df, 'search_and_backup')
 
-    return jsonify({"success": True, "message": f"Tìm thấy {len(filtered_df)} bản ghi!!!"})
+    # Cập nhật searched_data nếu có kết quả
+    if len(filtered_df) > 0:
+        search_and_backup_collection.update_one(
+            {"user_id": current_user.id},
+            {"$set": {"searched_data": filtered_df.to_dict(orient="records")}}
+        )
+
+    return jsonify({"success": True, "message": f"Tìm thấy {len(filtered_df)} bản ghi!"})
+
+#def search_keyword():
+#    data = request.get_json()
+#    keyword = data.get('keyword', '').lower()
+
+#    df = get_search_and_backup()  
+
+#    mask = df.apply(lambda row: row.astype(str).str.lower().str.contains(keyword).any(), axis=1)
+#    filtered_df = df[mask]
+#    if (len(filtered_df) > 0):
+#        overwrite_collection(filtered_df, 'search_and_backup')
+
+#    return jsonify({"success": True, "message": f"Tìm thấy {len(filtered_df)} bản ghi!!!"})
+
+
 
 def get_detail_from_ram(mac):
     record = get_record()
@@ -593,7 +636,9 @@ def update_list():
 @app.route('/search_history', methods=['GET', 'POST'])
 @login_required
 def search_history():
-    reset_ram()
+    date_1 = request.form.get('date_1')
+    date_2 = request.form.get('date_2')
+
     ssh_host = "86.64.60.71"
     ssh_port = 22
     ssh_user = 'root'
@@ -606,31 +651,36 @@ def search_history():
 
     before_start = '2024-08-19 23:59:59'
     start_time = '2024-08-18 00:00:00'
-    filter,name = get_filter(before_start, start_time)
+    filter,name = get_filter(date_1, date_2)
 
     #result1 = get_mongo_data(ssh_host, ssh_port, ssh_user, ssh_password, mongo_host, mongo_port, mongo_db, mongo_collection, filter, sample_size=10)
     #df = raw_to_df(result1)
     #df = pd.DataFrame(df)
-    time.sleep(5)
-    df = pd.read_excel(r'2024-08-19-2024-08-20-records.xlsx')
-
-    database = get_database(black_list_path)
-    rule = database['ip'].tolist()
-    df_filtered = filtering(df, rule)
+    df = pd.read_excel(r'2024-08-19-2024-08-20-records.xlsx')   
+    df_white_list = get_white_list()
+    rule = df_white_list['ip'].tolist()
+    df_filtered = filtering_2(df, rule)
     df_filtered_2 = match_miav_database(df_filtered)
-
-    update_other_parameter(len(df), 'query')
-    update_chart_parameter(df_filtered)
+    #print(df_filtered_2)
+    #update_other_parameter(len(df), 'query')
+    #update_chart_parameter(df_filtered)
     count = len(df_filtered)
-    update_other_parameter(count, 'detect')
+    #update_other_parameter(count, 'detect')
     print(f"There are {count} alert for 300s from {before_start} to {start_time}")
     if len(df_filtered_2) > 0:
-        append_record_to_ram(ram_path, df_filtered_2)
+
+        record_to_insert = {
+            "user_id": current_user.id,
+            "data": df_filtered_2.to_dict(orient="records")
+        }
+        search_history_collection.insert_one(record_to_insert)
     return '1'
 
 
 @app.route("/export_file", methods=["GET"])
 def export_file():
+    print("aaaaaaaaaaaaaa---------------")
+    print(current_user.id)
     try:
         data = list(ram_collection.find({}, {"_id": 0}))
         return jsonify({
@@ -647,6 +697,64 @@ def export_file():
 
 @app.route("/import_file", methods=["POST"])
 def import_file():
+    required_fields = [
+        "ALERT_LEVEL_ID", "ALERT_TYPE", "DESCRIPTION", "EXTRACTED_IP",
+        "IP", "LABEL", "MAC", "TIME_RECEIVE",
+        "UNIT_FULL_NAME", "UNIT_NAME", "USER_NAME"
+    ]
+
+    if 'file' not in request.files:
+        return jsonify({
+            "success": False,
+            "message": "Chưa có file được gửi lên."
+        }), 400
+
+    file = request.files['file']
+
+    try:
+        data = json.load(file)
+
+        if not isinstance(data, list):
+            return jsonify({
+                "success": False,
+                "message": "Dữ liệu JSON phải là danh sách các bản ghi."
+            }), 400
+
+        # Kiểm tra từng bản ghi có đầy đủ trường bắt buộc không
+        for i, record in enumerate(data):
+            missing = [field for field in required_fields if field not in record]
+            if missing:
+                return jsonify({
+                    "success": False,
+                    "message": f"Bản ghi thứ {i+1} thiếu: {', '.join(missing)}"
+                }), 400
+
+        # Nếu hợp lệ, xóa dữ liệu cũ của user
+        search_and_backup_collection.delete_many({"user_id": current_user.id})
+
+        # Tạo document mới theo format 3 trường
+        file_record = {
+            "user_id": current_user.id,
+            "data": data,
+            "searched_data": data  # ban đầu giống hệt bản gốc
+        }
+
+        search_and_backup_collection.insert_one(file_record)
+
+        return jsonify({
+            "success": True,
+            "message": "Import thành công và dữ liệu đã lưu.",
+            "count": len(data)
+        })
+
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": f"Lỗi xử lý file: {str(e)}"
+        }), 500
+
+
+def import_file_2():
     required_fields = [
         "ALERT_LEVEL_ID", "ALERT_TYPE", "DESCRIPTION", "EXTRACTED_IP",
         "IP", "LABEL", "MAC", "TIME_RECEIVE",
@@ -710,8 +818,6 @@ def get_monthly_record_counts(df):
     months.reverse()  
     df["Month_Year"] = df["TIME_RECEIVE"].dt.strftime("%m/%Y")
     record_counts = [df[df["Month_Year"] == month].shape[0] for month in months]
-    print(months)
-    print(record_counts)
     return months, record_counts
 
 
@@ -830,7 +936,7 @@ def filtering(df, list):
 		if any(key in str(a['DESCRIPTION']) for key in list):
 			df_filtered = df_filtered._append(a, ignore_index = True)
 	return df_filtered
-# Hàm filtering, bỏ các white record, giữ lại black và gray
+# Hàm filtering2, bỏ các white record, giữ lại black và gray
 def filtering_2(df, list):
 	df_filtered = pd.DataFrame(columns = df.columns)
 	for _,row in df.iterrows():
@@ -840,13 +946,13 @@ def filtering_2(df, list):
 	return df_filtered
 
 def match_miav_database(df_filtered):
-    miav_database = get_list(miav_database_path)
-    miav_database = miav_database['ip'].tolist()
+    miav_database_df = get_miav_database()
+    miav_ip_list = miav_database_df['IP'].tolist()
 
     df_filtered['EXTRACTED_IP'] = df_filtered['DESCRIPTION'].str.replace("connect to ", "", regex=False)
 
     def check_match(value):
-        return 1 if value in miav_database else 0
+        return 1 if value in miav_ip_list else 0
     df_filtered['label'] = df_filtered['EXTRACTED_IP'].apply(check_match)
     print(df_filtered)
     return df_filtered
@@ -888,6 +994,23 @@ def get_mongo_data(ssh_host, ssh_port, ssh_user, ssh_password, mongo_host, mongo
 	print('done 1')
 	return result
 
+def insert_with_limit_ram(data_list, limit=500000):
+    current_count = ram_collection.count_documents({})
+    insert_count = len(data_list)
+    excess = (current_count + insert_count) - limit
+    if excess > 0:
+        ram_collection.delete_many({}, limit=excess, sort=[("TIME_RECEIVE", 1)])
+    ram_collection.insert_many(data_list)
+
+
+def insert_with_limit_search(data_list, limit=500000):
+    current_count = search_history_collection.count_documents({})
+    insert_count = len(data_list)
+    excess = (current_count + insert_count) - limit
+    if excess > 0:
+        search_history_collection.delete_many({}, limit=excess, sort=[("TIME_RECEIVE", 1)])
+    search_history_collection.insert_many(data_list)
+
 def core():
     ssh_host = "86.64.60.71"
     ssh_port = 22
@@ -911,18 +1034,17 @@ def core():
         df = pd.read_excel(r'2024-08-19-2024-08-20-records.xlsx')   
         df_white_list = get_white_list()
         rule = df_white_list['ip'].tolist()
-        exit(0)
         df_filtered = filtering_2(df, rule)
-        #df_filtered_2 = match_miav_database(df_filtered)
+        df_filtered_2 = match_miav_database(df_filtered)
         #print(df_filtered_2)
-        update_other_parameter(len(df), 'query')
-        update_chart_parameter(df_filtered)
+        #update_other_parameter(len(df), 'query')
+        #update_chart_parameter(df_filtered)
         count = len(df_filtered)
-        update_other_parameter(count, 'detect')
+        #update_other_parameter(count, 'detect')
         print(f"There are {count} alert for 300s from {before_start} to {start_time}")
         if len(df_filtered_2) > 0:
-            #print(df_filtered)
-            append_record_to_ram(ram_path, df_filtered_2)
+            records_to_insert = df_filtered_2.to_dict(orient="records")
+            insert_with_limit_ram(records_to_insert)
         a = a + 1
         end_time = datetime.now()
         elapsed_time = end_time - start_time

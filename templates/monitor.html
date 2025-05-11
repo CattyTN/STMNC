@@ -18,6 +18,18 @@ tbody td {
   font-size: 12px;
 }
 
+
+  .datepicker {
+    width: 300px !important; 
+    padding: 3px !important; 
+  }
+  .datepicker table {
+    width: 300px !important; /* Đảm bảo bảng bên trong chiếm hết chiều rộng */
+  }
+  .datepicker td, .datepicker th {
+    padding: 5px !important; /* Điều chỉnh padding các ô ngày tháng */
+    font-size: 12px !important; /* Điều chỉnh kích thước font chữ */
+  }
 </style>
 
 {% endblock stylesheets %}
@@ -30,6 +42,14 @@ tbody td {
         <div class="card ">
           <div class="card-header d-flex align-items-center justify-content-between">
             <h4 class="card-title"> <strong>GIÁM SÁT HOẠT ĐỘNG</strong></h4>
+            
+            
+            <input type="text" id="datetimepicker_1" class="form-control" style="width: 15%;" placeholder="Từ ngày" />
+            <input type="text" id="datetimepicker_2" class="form-control" style="width: 15%;" placeholder="Đến ngày" />
+            <label class="btn btn-sm btn-default active" id="search_history_button">
+              <span class="d-none d-sm-block d-md-block d-lg-block d-xl-block" >Tìm kiếm</span>
+          </label>
+            
             <div><label class="btn btn-sm btn-default active" id="start_button">
               <span class="d-none d-sm-block d-md-block d-lg-block d-xl-block" >Giám sát</span>
           </label>
@@ -184,6 +204,50 @@ tbody td {
           });
       });
   });
+
+ const picker2 = new tempusDominus.TempusDominus(document.getElementById('datetimepicker_1'), {
+  display: {
+    components: {
+      calendar: true,
+      date: true,
+      month: true,
+      year: true,
+      decades: true,
+      clock: true,
+      hours: true,
+      minutes: true,
+      seconds: true,
+      useTwentyfourHour: true
+    }
+  },
+  localization: {
+    format: 'yyyy-MM-dd HH:mm:ss'
+  }
+});
+
+
+
+ const picker = new tempusDominus.TempusDominus(document.getElementById('datetimepicker_2'), {
+  display: {
+    components: {
+      calendar: true,
+      date: true,
+      month: true,
+      year: true,
+      decades: true,
+      clock: true,
+      hours: true,
+      minutes: true,
+      seconds: true,
+      useTwentyfourHour: true
+    }
+  },
+  localization: {
+    format: 'yyyy-MM-dd HH:mm:ss'
+  }
+});
+
+
 </script>
 
 <!-- để phân trang  -->

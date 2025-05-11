@@ -616,12 +616,12 @@ window.addEventListener('load', function(){
 
 function search_history_button() {
 
-    var e = document.getElementById("search_button");
+    var e = document.getElementById("search_history_button");
     if(e){
         e.addEventListener('click', function () {
         
-        var datetime1 = document.getElementById("datetimepicker").value
-        var datetime2 = document.getElementById("datetimepicker2").value
+        var datetime1 = document.getElementById("datetimepicker_1").value
+        var datetime2 = document.getElementById("datetimepicker_2").value
         var formattedDatetime1 = datetime1.replace(/\//g, "-") + ":00"
         var formattedDatetime2 = datetime2.replace(/\//g, "-") + ":00"
         if ((datetime1 == '') || (datetime2 == '')){
@@ -636,11 +636,11 @@ function search_history_button() {
                 type: 'POST',
                 url: '/search_history',
                 data: {
-                    date_1: formattedDatetime1,
-                    date_2: formattedDatetime2,
+                    date_1: datetime1,
+                    date_2: datetime2,
                 },
                 success: function(response) {
-                    window.location.href = "/tables";
+                    window.location.href = "/monitor";
                 },
                 error: function(error) {
                     console.log("error");
@@ -1129,3 +1129,6 @@ function search_button() {
       });
     }
   }
+
+
+
