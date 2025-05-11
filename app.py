@@ -276,16 +276,17 @@ def reset_search():
 @login_required
 def monitor():
     if session.get('search_mode'):
-        # Truy vấn bản ghi mới nhất theo user_id
+        print("Có session của ", current_user.id)
         record = search_history_collection.find_one(
             {"user_id": current_user.id},
-            sort=[("_id", -1)]  # bản mới nhất
+            sort=[("_id", -1)]  
         )
         if record and "data" in record:
             records = pd.DataFrame(record["data"])
         else:
             records = pd.DataFrame()
     else:
+        print('Hết session')
         records = get_record()
 
     records = records.fillna("N/A").replace("", "N/A")
@@ -300,7 +301,7 @@ def monitor_page():
     current_page = int(request.args.get("page", 1))
 
     if session.get('search_mode'):
-        # Truy vấn bản ghi mới nhất theo user_id
+        print("Có session của ", current_user.id)
         record = search_history_collection.find_one(
             {"user_id": current_user.id},
             sort=[("_id", -1)]  # bản mới nhất
@@ -310,6 +311,7 @@ def monitor_page():
         else:
             records = pd.DataFrame()
     else:
+        print("Hết session ")
         records = get_record()
 
     records = records.fillna("N/A").replace("", "N/A")

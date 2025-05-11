@@ -613,45 +613,65 @@ function update_button() {
 window.addEventListener('load', function(){
     search_history_button()
 })
+window.addEventListener('load', function () {
+    search_history_button()
+})
 
 function search_history_button() {
-
     var e = document.getElementById("search_history_button");
-    if(e){
+    if (e) {
         e.addEventListener('click', function () {
-        
-        var datetime1 = document.getElementById("datetimepicker_1").value
-        var datetime2 = document.getElementById("datetimepicker_2").value
-        var formattedDatetime1 = datetime1.replace(/\//g, "-") + ":00"
-        var formattedDatetime2 = datetime2.replace(/\//g, "-") + ":00"
-        if ((datetime1 == '') || (datetime2 == '')){
-            Swal.fire({
-                title: "Chưa nhập ngày!",
-                text: "Hãy nhập đầy đủ ngày tháng.",
-                icon: "warning"
-            });
-        }
-        else{
-            $.ajax({
-                type: 'POST',
-                url: '/search_history',
-                data: {
-                    date_1: datetime1,
-                    date_2: datetime2,
-                },
-                success: function(response) {
-                    window.location.href = "/monitor";
-                },
-                error: function(error) {
-                    console.log("error");
-                }
-            });
-        }
+            var datetime1 = document.getElementById("datetimepicker_1").value
+            var datetime2 = document.getElementById("datetimepicker_2").value
 
+            if ((datetime1 === '') || (datetime2 === '')) {
+                Swal.fire({
+                    title: "Chưa nhập ngày!",
+                    text: "Hãy nhập đầy đủ ngày tháng.",
+                    icon: "warning"
+                });
+            } else {
+                // Hiển thị loading khi gửi request
+                Swal.fire({
+                    title: "Đang tìm kiếm...",
+                    html: "Vui lòng đợi trong giây lát.",
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    didOpen: () => {
+                        Swal.showLoading()
+                    }
+                });
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/search_history',
+                    data: {
+                        date_1: datetime1,
+                        date_2: datetime2,
+                    },
+                    success: function (response) {
+                        // Khi thành công, đóng alert rồi chuyển hướng
+                        Swal.fire({
+                            title: "Hoàn tất!",
+                            icon: "success",
+                            timer: 1000,
+                            showConfirmButton: false
+                        }).then(() => {
+                            window.location.href = "/monitor";
+                        });
+                    },
+                    error: function (error) {
+                        Swal.fire({
+                            title: "Lỗi!",
+                            text: "Có lỗi xảy ra khi tìm kiếm.",
+                            icon: "error"
+                        });
+                    }
+                });
+            }
         });
     }
 }
-
 
 
 

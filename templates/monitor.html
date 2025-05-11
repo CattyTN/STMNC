@@ -247,7 +247,17 @@ tbody td {
   }
 });
 
-
+    window.addEventListener('load', function () {
+        if (performance.navigation.type === 1) {
+            // Nếu là reload (F5)
+            fetch('/reset_search', {
+                method: 'POST',
+                credentials: 'include'
+            }).then(() => {
+                window.location.href = '/monitor';
+            });
+        }
+    });
 </script>
 
 <!-- để phân trang  -->
