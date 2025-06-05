@@ -961,12 +961,13 @@ def get_database(file_path):
 	return df
 
 def filtering(df, list):
-	df_filtered = pd.DataFrame(columns = df.columns)
-	for _,row in df.iterrows():
-		a = row
-		if any(key in str(a['DESCRIPTION']) for key in list):
-			df_filtered = df_filtered._append(a, ignore_index = True)
-	return df_filtered
+    df_filtered = pd.DataFrame(columns = df.columns)
+    for _,row in df.iterrows():
+        a = row
+        if str(a['ALERT_TYPE']) == "Gray_ip" or str(a['ALERT_TYPE']) == "Gray_domain":
+            if any(key in str(a['DESCRIPTION']) for key in list):
+                df_filtered = df_filtered._append(a, ignore_index = True)
+    return df_filtered
 # Hàm filtering2, bỏ các white record, giữ lại black và gray
 def filtering_2(df, list):
 	df_filtered = pd.DataFrame(columns = df.columns)
@@ -984,7 +985,7 @@ def match_miav_database(df_filtered):
 
     def check_match(value):
         return 1 if value in miav_ip_list else 0
-    df_filtered['label'] = df_filtered['EXTRACTED_IP'].apply(check_match)
+    df_filtered['LABEL'] = df_filtered['EXTRACTED_IP'].apply(check_match)
     print(df_filtered)
     return df_filtered
     

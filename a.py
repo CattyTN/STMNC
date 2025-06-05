@@ -41,8 +41,8 @@ def create_password(plain_text):
     return hashed_password.decode('utf-8')
 
 
-#delete_collection('ram')
-create_collection('miav_database.xlsx', 'miav_database')
+delete_collection('ram')
+create_collection('ram.xlsx', 'ram')
 
 
 def convert_password(plain_text):
