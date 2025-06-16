@@ -720,7 +720,7 @@ def search_history():
     start_str = date_1.strftime("%Y-%m-%d %H:%M:%S")
     end_str = date_2.strftime("%Y-%m-%d %H:%M:%S")
     raw_data = get_event_data(token, start_str, end_str)
-
+    print(raw_data)
     if raw_data is None:
         print('data is none')
         return '1'
@@ -736,6 +736,7 @@ def search_history():
     count = len(df_filtered)
     #update_other_parameter(count, 'detect')
     print(f"There are {count} alert for 300s from {date_1} to {date_2}")
+    print('count')
     if len(df_filtered_2) > 0:
 
         record_to_insert = {
