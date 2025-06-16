@@ -662,10 +662,9 @@ def update_list():
     append_data_to_excel(black_list, white_list)       
     return redirect(url_for('virus_check'))
 
-@app.route('/search_history', methods=['GET', 'POST'])
+@app.route('/search_history_goc', methods=['GET', 'POST'])
 @login_required
-def search_history():
-
+def search_history_goc():
     date_1 = request.form.get('date_1')
     date_2 = request.form.get('date_2')
 
@@ -684,7 +683,7 @@ def search_history():
     filter,name = get_filter(date_1, date_2)
 
     #result1 = get_mongo_data(ssh_host, ssh_port, ssh_user, ssh_password, mongo_host, mongo_port, mongo_db, mongo_collection, filter, sample_size=10)
-    #df = raw_to_df(result1)
+    #df = raw_to_df_goc(result1)
     #df = pd.DataFrame(df)
     df = pd.read_excel(r'2024-08-19-2024-08-20-records.xlsx')   
     df_white_list = get_white_list()
@@ -707,6 +706,43 @@ def search_history():
         search_history_collection.insert_one(record_to_insert)
     return '1'
 
+@app.route('/search_history', methods=['GET', 'POST'])
+@login_required
+def search_history():
+
+    date_1 = request.form.get('date_1')
+    date_2 = request.form.get('date_2')
+
+    token = get_token()
+    if not token:
+        print("[!] Không lấy được token, chờ 10s rồi thử lại...")
+        time.sleep(10)
+    start_str = date_1.strftime("%Y-%m-%d %H:%M:%S")
+    end_str = date_2.strftime("%Y-%m-%d %H:%M:%S")
+    raw_data = get_event_data(token, start_str, end_str)
+
+    if raw_data is None:
+        time.sleep(10)
+    df = raw_to_df(raw_data)
+    df_white_list = get_white_list()
+    rule = df_white_list['ip'].tolist()
+    df_filtered = filtering_2(df, rule)
+    df_filtered_2 = match_miav_database(df_filtered)
+    session['search_mode'] = True
+    #print(df_filtered_2)
+    #update_other_parameter(len(df), 'query')
+    #update_chart_parameter(df_filtered)
+    count = len(df_filtered)
+    #update_other_parameter(count, 'detect')
+    print(f"There are {count} alert for 300s from {date_1} to {date_2}")
+    if len(df_filtered_2) > 0:
+
+        record_to_insert = {
+            "user_id": current_user.id,
+            "data": df_filtered_2.to_dict(orient="records")
+        }
+        search_history_collection.insert_one(record_to_insert)
+    return '1'
 
 @app.route("/export_file", methods=["GET"])
 def export_file():
@@ -996,7 +1032,7 @@ def get_filter(formatted_date_1, formatted_date_2):
 	name = str(formatted_date_1) + '-' + str(formatted_date_2)
 	return filter,name
 
-def raw_to_df(result):
+def raw_to_df_goc(result):
 	data = {'MAC': [],'IP': [],'UNIT_NAME': [],'USER_NAME': [],'UNIT_FULL_NAME': [],'ALERT_TYPE': [],'ALERT_LEVEL_ID': [], 'TIME_RECEIVE': [],'DESCRIPTION': []}
 	for record in result:
 		data['MAC'].append(str(record['mac']))
@@ -1043,7 +1079,7 @@ def insert_with_limit_search(data_list, limit=500000):
         search_history_collection.delete_many({}, limit=excess, sort=[("TIME_RECEIVE", 1)])
     search_history_collection.insert_many(data_list)
 
-def core():
+def core_goc():
     ssh_host = "86.64.60.71"
     ssh_port = 22
     ssh_user = 'root'
@@ -1080,11 +1116,117 @@ def core():
         a = a + 1
         end_time = datetime.now()
         elapsed_time = end_time - start_time
-        sleep_time =  max(0, (timedelta(seconds=10) - elapsed_time).total_seconds())
+        sleep_time =  max(0, (timedelta(seconds=60) - elapsed_time).total_seconds())
         time.sleep(sleep_time)
         data = df_filtered_2.to_json(orient='records')
         if loop_active:
             socketio.emit('new_data', data)
+
+def raw_to_df(response_json):
+    records = response_json.get("data", {}).get("event", [])
+    data = {
+        'MAC': [],
+        'IP': [],
+        'UNIT_NAME': [],
+        'USER_NAME': [],
+        'UNIT_FULL_NAME': [],
+        'ALERT_TYPE': [],
+        'ALERT_LEVEL_ID': [],
+        'TIME_RECEIVE': [],
+        'DESCRIPTION': []
+    }
+    for record in records:
+        data['MAC'].append(str(record.get('mac', '')))
+        data['IP'].append(str(record.get('ip', '')))
+        data['UNIT_NAME'].append(str(record.get('unit_full_name', '').split(' - ')[0]))
+        data['USER_NAME'].append("Chua dinh danh")
+        data['UNIT_FULL_NAME'].append(str(record.get('unit_full_name', '')))
+        data['ALERT_TYPE'].append(str(record.get('alert_type', '')))
+        data['ALERT_LEVEL_ID'].append(str(record.get('alert_level_id', '')))
+        data['TIME_RECEIVE'].append(str(record.get('time_receive', '')))
+        data['DESCRIPTION'].append(
+            str(record.get('alert_info', {}).get('description', 'No description available'))
+        )
+
+    return pd.DataFrame(data)
+
+def get_token():
+    LOGIN_URL = 'https://86.64.1.18/api/v1/auth/login'
+    payload = {
+        'username': 'admin',
+        'password': 'Zxcvbnm!@#'
+    }
+    response = requests.post(LOGIN_URL, json=payload, verify=False)
+    if response.status_code == 200:
+        try:
+            data = response.json()
+            print(data['data'][0]['token'])
+            return data['data'][0]['token']
+        except Exception as e:
+            print("[!] Không trích được token:", e)
+            return None
+    else:
+        print("[✗] Đăng nhập thất bại:", response.status_code)
+        return None
+
+def get_event_data(token, start_date, end_date):
+    url = "https://86.64.1.18/api/v1/events/paginate"
+    params = {
+        'skip': 0,
+        'take': 40,
+        'requireTotalCount': 'true,true',
+        'sort': '[{"selector":"alert_type","desc":false}]',
+        'filter': '["alert_type","=","Gray_ip"]',
+        'totalSummary': '[{"selector":"mac","summaryType":"count"}]',
+        'start_date': start_date,
+    	'end_date': end_date,
+        'unit_code': 'all'
+    }
+    headers = {
+        'Authorization': f'Bearer {token}',
+        'Accept': '*/*',
+        'User-Agent': 'Mozilla/5.0'
+    }
+    response = requests.get(url, headers=headers, params=params, verify=False)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        print("[✗] Lỗi khi gửi request:", response.status_code)
+        return None
+
+def core():
+    global loop_active
+    while loop_active:
+        start_time = datetime.now() - timedelta(minutes=10)
+        before_start = start_time - timedelta(minutes=1)
+        token = get_token()
+        if not token:
+            print("[!] Không lấy được token, chờ 10s rồi thử lại...")
+            time.sleep(10)
+            continue
+
+        start_str = before_start.strftime("%Y-%m-%d %H:%M:%S")
+        end_str = start_time.strftime("%Y-%m-%d %H:%M:%S")
+        raw_data = get_event_data(token, start_str, end_str)
+
+        if raw_data is None:
+            time.sleep(10)
+            continue
+        df = raw_to_df(raw_data)
+        df_white_list = get_white_list()
+        rule = df_white_list['ip'].tolist()
+        df_filtered = filtering_2(df, rule)
+        count = len(df_filtered)
+        df_filtered_2 = match_miav_database(df_filtered)
+        print(f"There are {count} alert for 300s from {before_start} to {start_time}")
+        if len(df_filtered_2) > 0:
+            records_to_insert = df_filtered_2.to_dict(orient="records")
+            insert_with_limit_ram(records_to_insert)
+        a = a + 1
+        end_time = datetime.now()
+        elapsed_time = end_time - start_time
+        sleep_time =  max(0, (timedelta(seconds=60) - elapsed_time).total_seconds())
+        time.sleep(sleep_time)
 
 @app.route('/start', methods=['GET', 'POST'])
 @login_required
@@ -1185,3 +1327,8 @@ if __name__ == '__main__':
 
 #investigate_ip_stmnc('45.125.66.56')
 #print(get_relationship())
+
+
+#chuyen core thành core_goc
+#chuyen raw_to_df thành raw_to_df_goc
+# chuyen raw_to_df trong search_history
