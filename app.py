@@ -716,14 +716,14 @@ def search_history():
     token = get_token()
     if not token:
         print("[!] Không lấy được token, chờ 10s rồi thử lại...")
-        return 'No data', 400
+        return '1'
     start_str = date_1.strftime("%Y-%m-%d %H:%M:%S")
     end_str = date_2.strftime("%Y-%m-%d %H:%M:%S")
     raw_data = get_event_data(token, start_str, end_str)
 
     if raw_data is None:
         time.sleep(5)
-        return 'No data', 400
+        return '1'
     df = raw_to_df(raw_data)
     df_white_list = get_white_list()
     rule = df_white_list['ip'].tolist()
