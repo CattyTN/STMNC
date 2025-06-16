@@ -709,10 +709,10 @@ def search_history_goc():
 @app.route('/search_history', methods=['GET', 'POST'])
 @login_required
 def search_history():
-
+    print("vao ham")
     date_1 = request.form.get('date_1')
     date_2 = request.form.get('date_2')
-
+    print(date_1)
     token = get_token()
     if not token:
         print("[!] Không lấy được token, chờ 10s rồi thử lại...")
@@ -722,7 +722,7 @@ def search_history():
     raw_data = get_event_data(token, start_str, end_str)
 
     if raw_data is None:
-        time.sleep(5)
+        print('data is none')
         return '1'
     df = raw_to_df(raw_data)
     df_white_list = get_white_list()
