@@ -187,6 +187,51 @@ ram_path = 'ram.xlsx'
 
 is_login = False
 
+
+def get_token():
+    LOGIN_URL = 'https://86.64.1.18/api/v1/auth/login'
+    payload = {
+        'username': 'admin',
+        'password': 'Zxcvbnm!@#'
+    }
+    response = requests.post(LOGIN_URL, json=payload, verify=False)
+    if response.status_code == 200:
+        try:
+            data = response.json()
+            print(data['data'][0]['token'])
+            return data['data'][0]['token']
+        except Exception as e:
+            print("[!] Không trích được token:", e)
+            return None
+    else:
+        print("[✗] Đăng nhập thất bại:", response.status_code)
+        return None
+
+def get_event_data(token, start_date, end_date):
+    url = "https://86.64.1.18/api/v1/events/paginate"
+    params = {
+        'skip': 0,
+        'take': 40,
+        'requireTotalCount': 'true,true',
+        'sort': '[{"selector":"alert_type","desc":false}]',
+        'filter': '["alert_type","=","Gray_ip"]',
+        'totalSummary': '[{"selector":"mac","summaryType":"count"}]',
+        'start_date': start_date,
+    	'end_date': end_date,
+        'unit_code': 'all'
+    }
+    headers = {
+        'Authorization': f'Bearer {token}',
+        'Accept': '*/*',
+        'User-Agent': 'Mozilla/5.0'
+    }
+    response = requests.get(url, headers=headers, params=params, verify=False)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        print("[✗] Lỗi khi gửi request:", response.status_code)
+        return None
+
 def get_list(file_path):
 	df = pd.read_excel(file_path)
 	return df
@@ -1152,49 +1197,7 @@ def raw_to_df(response_json):
 
     return pd.DataFrame(data)
 
-def get_token():
-    LOGIN_URL = 'https://86.64.1.18/api/v1/auth/login'
-    payload = {
-        'username': 'admin',
-        'password': 'Zxcvbnm!@#'
-    }
-    response = requests.post(LOGIN_URL, json=payload, verify=False)
-    if response.status_code == 200:
-        try:
-            data = response.json()
-            print(data['data'][0]['token'])
-            return data['data'][0]['token']
-        except Exception as e:
-            print("[!] Không trích được token:", e)
-            return None
-    else:
-        print("[✗] Đăng nhập thất bại:", response.status_code)
-        return None
 
-def get_event_data(token, start_date, end_date):
-    url = "https://86.64.1.18/api/v1/events/paginate"
-    params = {
-        'skip': 0,
-        'take': 40,
-        'requireTotalCount': 'true,true',
-        'sort': '[{"selector":"alert_type","desc":false}]',
-        'filter': '["alert_type","=","Gray_ip"]',
-        'totalSummary': '[{"selector":"mac","summaryType":"count"}]',
-        'start_date': start_date,
-    	'end_date': end_date,
-        'unit_code': 'all'
-    }
-    headers = {
-        'Authorization': f'Bearer {token}',
-        'Accept': '*/*',
-        'User-Agent': 'Mozilla/5.0'
-    }
-    response = requests.get(url, headers=headers, params=params, verify=False)
-    if response.status_code == 200:
-        return response.json()
-    else:
-        print("[✗] Lỗi khi gửi request:", response.status_code)
-        return None
 
 def core():
     global loop_active
