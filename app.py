@@ -69,7 +69,7 @@ def get_parameter():
         df.drop(columns=["_id"], inplace=True)
     return df
 def get_record():
-    ram_data = list(ram_collection.find())
+    ram_data = list(ram_collection.find().sort("TIME_RECEIVE", -1))
     df = pd.DataFrame(ram_data)
     if "_id" in df.columns:
         df.drop(columns=["_id"], inplace=True)
