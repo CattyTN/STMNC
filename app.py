@@ -428,6 +428,7 @@ def delete_user():
 def index():
     #df1 là biểu đồ cột, df2 là 3 thôn số thống kê, monthlist và monthcount là thông số cho biểu đồ đường
     records = get_record()
+    print(len(records))
     month_list, month_count = get_monthly_record_counts(records)
     df_1, df_2 = get_dashboard_parameter()
     df_1_json = df_1.to_dict(orient='records')

@@ -673,7 +673,39 @@ function search_history_button() {
     }
 }
 
+function chart_2(){
+    var ctx = document.getElementById("chartLinePurple_2").getContext("2d");
 
+    var gradientStroke = ctx.createLinearGradient(0, 230, 0, 50);
+
+    gradientStroke.addColorStop(1, 'rgba(29,140,248,0.2)');
+    gradientStroke.addColorStop(0.4, 'rgba(29,140,248,0.0)');
+    gradientStroke.addColorStop(0, 'rgba(29,140,248,0)'); //blue colors
+    
+
+    var myChart = new Chart(ctx, {
+      type: 'horizontalBar',
+      responsive: true,
+      legend: {
+        display: false
+      },
+      data: {
+        labels: ['China APT Group', 'MageCart Group 9', 'UNC4191', 'RATicate', 'Haskers Gang', 'TiltedTemple'],
+        datasets: [{
+          label: "Countries",
+          fill: true,
+          backgroundColor: gradientStroke,
+          hoverBackgroundColor: gradientStroke,
+          borderColor: '#1f8ef1',
+          borderWidth: 2,
+          borderDash: [],
+          borderDashOffset: 0.0,
+          data: [53, 20, 10, 80, 100, 45],
+        }]
+      },
+      options: gradientBarChartConfiguration
+    });
+}
 
 function chart(){
     var ctx = document.getElementById("CountryChart").getContext("2d");

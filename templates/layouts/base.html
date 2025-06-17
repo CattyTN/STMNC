@@ -35,8 +35,10 @@
     <link href="../static/assets/demo/demo.css" rel="stylesheet"/>
 
 -->
-    <link href="https://fonts.googleapis.com/css?family=Poppins:200,300,400,600,700,800" rel="stylesheet"/>
-    <link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+    <!--<link href="https://fonts.googleapis.com/css?family=Poppins:200,300,400,600,700,800" rel="stylesheet"/>-->
+    <link href="{{ url_for('static', filename='assets/css/fonts.google.css') }}" rel="stylesheet"/>
+    <!--<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">-->
+    <link href="{{ url_for('static', filename='assets/css/fontawesome.css') }}" rel="stylesheet"/>
     <link href="{{ url_for('static', filename='assets/css/nucleo-icons.css') }}" rel="stylesheet"/>
     <link href="{{ url_for('static', filename='assets/css/black-dashboard.css') }}" rel="stylesheet"/>
     <link href="{{ url_for('static', filename='assets/css/theme-switcher.css') }}" rel="stylesheet"/>
@@ -46,7 +48,7 @@
 
 
 <!-- Tempus Dominus CSS -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@eonasdan/tempus-dominus@6.4.4/dist/css/tempus-dominus.min.css" />
+<!--<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@eonasdan/tempus-dominus@6.4.4/dist/css/tempus-dominus.min.css" />-->
 
     <!-- Specific Page CSS goes HERE  -->
     {% block stylesheets %}{% endblock stylesheets %}
