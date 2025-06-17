@@ -36,11 +36,13 @@
   <link href="../static/assets/css/theme-switcher.css" rel="stylesheet"/>
   <link href="../static/assets/demo/demo.css" rel="stylesheet" />
 -->
-  <link href="https://fonts.googleapis.com/css?family=Poppins:200,300,400,600,700,800" rel="stylesheet" />
-  <link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+  <!--<link href="https://fonts.googleapis.com/css?family=Poppins:200,300,400,600,700,800" rel="stylesheet" />-->
+  <link href="{{ url_for('static', filename='assets/css/poppin.css')}}" rel="stylesheet">\
+
+  <link href="{{ url_for('static', filename='assets/css/all.css')}}" rel="stylesheet">\
   <link href="{{ url_for('static', filename='assets/css/nucleo-icons.css')}}" rel="stylesheet" />
   <link href="{{ url_for('static', filename='assets/css/black-dashboard.css')}}" rel="stylesheet" />
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-rtl/3.4.0/css/bootstrap-rtl.css" rel="stylesheet" />
+  <link href="{{ url_for('static', filename='assets/css/bootstrap-rtl.css')}}" rel="stylesheet" />
   <link href="{{ url_for('static', filename='assets/css/theme-switcher.css')}}" rel="stylesheet"/>
   <link href="{{ url_for('static', filename='assets/demo/demo.css')}}" rel="stylesheet" />
 

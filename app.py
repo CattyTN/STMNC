@@ -16,7 +16,7 @@ from pymongo import MongoClient
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 import re
 from pymongo import MongoClient
-
+import urllib3
 app = Flask(__name__)
 app.secret_key = "your_secret_key"  
 socketio = SocketIO(app)
@@ -44,6 +44,8 @@ malware_collection = db["malware"]
 campaign_collection = db["campaign"]
 intrusion_set_collection = db["intrusion_set"]
 
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 #lấy ra df user
 def get_users():
@@ -189,12 +191,14 @@ is_login = False
 
 
 def get_token():
+    print("----vao ham get_token")
     LOGIN_URL = 'https://86.64.1.18/api/v1/auth/login'
     payload = {
         'username': 'admin',
         'password': 'Zxcvbnm!@#'
     }
     response = requests.post(LOGIN_URL, json=payload, verify=False)
+    print("----", response)
     if response.status_code == 200:
         try:
             data = response.json()
@@ -206,6 +210,35 @@ def get_token():
     else:
         print("[✗] Đăng nhập thất bại:", response.status_code)
         return None
+
+def get_token_2():
+    print("----vao ham get_token")
+    LOGIN_URL = 'https://86.64.1.18/api/v1/auth/login'
+    payload = {
+        'username': 'admin',
+        'password': 'Zxcvbnm!@#'
+    }
+
+    try:
+        response = requests.post(LOGIN_URL, json=payload, verify=False, timeout=5)  # timeout 5s
+        print("----", response)
+
+        if response.status_code == 200:
+            try:
+                data = response.json()
+                print(data['data'][0]['token'])
+                return data['data'][0]['token']
+            except Exception as e:
+                print("[!] Không trích được token:", e)
+                return None
+        else:
+            print("[✗] Đăng nhập thất bại:", response.status_code)
+            return None
+
+    except requests.exceptions.RequestException as e:
+        print("[!] Lỗi khi gửi yêu cầu:", e)
+        return None
+
 
 def get_event_data(token, start_date, end_date):
     url = "https://86.64.1.18/api/v1/events/paginate"
@@ -758,13 +791,12 @@ def search_history():
     print("vao ham")
     date_1 = request.form.get('date_1')
     date_2 = request.form.get('date_2')
-    print(date_1)
     token = get_token()
     if not token:
         print("[!] Không lấy được token, chờ 10s rồi thử lại...")
         return '1'
-    start_str = date_1.strftime("%Y-%m-%d %H:%M:%S")
-    end_str = date_2.strftime("%Y-%m-%d %H:%M:%S")
+    start_str = date_1
+    end_str = date_2
     raw_data = get_event_data(token, start_str, end_str)
     print(raw_data)
     if raw_data is None:
@@ -1202,13 +1234,13 @@ def raw_to_df(response_json):
 
 def core():
     global loop_active
+    print(loop_active)
     while loop_active:
         start_time = datetime.now() - timedelta(minutes=10)
         before_start = start_time - timedelta(minutes=1)
         token = get_token()
         if not token:
             print("[!] Không lấy được token, chờ 10s rồi thử lại...")
-            time.sleep(10)
             continue
 
         start_str = before_start.strftime("%Y-%m-%d %H:%M:%S")

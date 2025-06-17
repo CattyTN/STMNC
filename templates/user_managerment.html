@@ -95,7 +95,7 @@ tbody td {
                       <li class="page-item active"><a class="page-link user_managerment" style="color:black;" href="#" id ='page_1'>1</a></li>
                       {% if total_pages > 1 %}<li class="page-item"><a class="page-link user_managerment" style="color:black;" href="#" id ='page_2'>2</a></li>
                       {% if total_pages > 3 %}<li class="page-item disabled"><a class="page-link user_managerment" style="color:black;">...</a></li>{% endif %}
-                      <li class="page-item"><a class="page-link user_managerment" style="color:black;" href="#" id="page_{{ total_pages }}">{{ total_pages }}</a></li>{% endif %}
+                      {% if total_pages > 2 %}<li class="page-item"><a class="page-link user_managerment" style="color:black;" href="#" id="page_{{ total_pages }}">{{ total_pages }}</a></li>{% endif %}{% endif %}
               
                   {% elif current_page == 2 %}
                       <li class="page-item"><a class="page-link user_managerment" style="color:black;" href="#" id ='page_1'>1</a></li>
@@ -167,7 +167,7 @@ tbody td {
             </div>
             <div class="form-group">
               <label for="description-input" class="col-form-label">Mật khẩu</label>
-              <input type="text" class="form-control" id="password-input">
+              <input type="password" class="form-control" id="password-input">
             </div>
             <div class="form-group">
               <label for="description-input" class="col-form-label">Đơn vị</label>
