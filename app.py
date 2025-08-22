@@ -472,7 +472,8 @@ def index():
     df_1, df_2 = get_dashboard_parameter()
     df_1_json = df_1.to_dict(orient='records')
     print(df_1)
-    return render_template('index.html',df_1_json=df_1_json, df_2 = df_2, month_list = month_list, month_count = month_count)
+    current_user_role = get_user_role()
+    return render_template('index.html',df_1_json=df_1_json, df_2 = df_2, month_list = month_list, month_count = month_count, current_user_role=current_user_role)
 
 @app.route("/chart")
 def chart():

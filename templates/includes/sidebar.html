@@ -31,12 +31,14 @@
                         <p  style="color: black;"><strong>Giám sát</strong></p>
                     </a>
                 </li>
+                {% if current_user_role == 'admin' %}
                 <li class="{% if 'tables' in segment %} active {% endif %}" >
                     <a href="/user_managerment">
                         <i class="tim-icons icon-single-02" style="color: black;"></i>
                         <p  style="color: black;"><strong>Quản lý người dùng</strong></p>
                     </a>
                 </li>
+                {%endif%}
                 <li class="{% if 'tables' in segment %} active {% endif %}" >
                     <a href="/chart">
                         <i class="tim-icons icon-single-02" style="color: black;"></i>
