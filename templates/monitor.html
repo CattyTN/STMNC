@@ -30,6 +30,21 @@ tbody td {
     padding: 5px !important; /* Điều chỉnh padding các ô ngày tháng */
     font-size: 12px !important; /* Điều chỉnh kích thước font chữ */
   }
+
+  /*fit bảng GIÁM SÁT với chiều cao của site*/
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+.content, .row, .col-md-12, .card {
+  height: 100%;
+}
+.card-body {
+  height: calc(100vh - 220px); /* Điều chỉnh số px cho vừa header/footer */
+  overflow-y: auto;
+  padding-bottom: 0;
+}
 </style>
 
 {% endblock stylesheets %}
@@ -49,13 +64,13 @@ tbody td {
             <label class="btn btn-sm btn-default active" id="search_history_button">
               <span class="d-none d-sm-block d-md-block d-lg-block d-xl-block" >Tìm kiếm</span>
           </label>
-            
+            {% if current_user_role == 'admin' %}
             <div><label class="btn btn-sm btn-default active" id="start_button">
               <span class="d-none d-sm-block d-md-block d-lg-block d-xl-block" >Giám sát</span>
           </label>
           <label class="btn btn-sm btn-default active" id="end_button">
             <span class="d-none d-sm-block d-md-block d-lg-block d-xl-block" >Dừng</span>
-        </label></div>
+        </label></div>{%endif%}
           </div>
           <div class="card-body">
             <div class="table-responsive ps">

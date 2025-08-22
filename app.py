@@ -173,9 +173,11 @@ def investigate_ip_stmnc(ip_str):
     print(results)
     return pd.DataFrame([results])
 
-
-
-
+def get_user_role():
+    user_doc = user_collection.find_one({"username": current_user.id})
+    if user_doc and "role" in user_doc:
+        return user_doc["role"]
+    return None
 
 
 loop_active = False
@@ -303,7 +305,8 @@ def ioc():
     total_pages = (len(indicator) + 9) // 7
     first_page_data = indicator.iloc[:7]
     m = 7
-    return render_template('ioc.html', indicator=first_page_data, total_pages=total_pages, current_page = 1, m = 7)
+    current_user_role = get_user_role()
+    return render_template('ioc.html', indicator=first_page_data, total_pages=total_pages, current_page = 1, m = 7, current_user_role=current_user_role)
 
 @app.route('/ioc_page', methods=['GET'])
 @login_required
@@ -317,7 +320,8 @@ def ioc_page():
     start = (current_page - 1) * 7  # Dòng bắt đầu
     end = start + 7  # Dòng kết thúc
     paginated_data = indicator.iloc[start:end]
-    return render_template('ioc.html', indicator=paginated_data, total_pages=total_pages, current_page = current_page, m = 7)
+    current_user_role = get_user_role()
+    return render_template('ioc.html', indicator=paginated_data, total_pages=total_pages, current_page = current_page, m = 7, current_user_role=current_user_role)
 
 
 @app.route('/add_ioc', methods=['GET', 'POST'])
@@ -371,7 +375,8 @@ def monitor():
     total_pages = (len(records) + 7) // 7
     first_page_data = records.iloc[:7]
     a = len(records)
-    return render_template('monitor.html', records=first_page_data, total_pages=total_pages, current_page = 1, a = a)
+    current_user_role = get_user_role()
+    return render_template('monitor.html', records=first_page_data, total_pages=total_pages, current_page = 1, a = a,current_user_role=current_user_role)
 
 @app.route('/monitor_page', methods=['GET', 'POST'])
 @login_required
@@ -397,7 +402,8 @@ def monitor_page():
     start = (current_page - 1) * 7  
     end = start + 7 
     paginated_data = records.iloc[start:end]
-    return render_template('monitor.html', records=paginated_data, total_pages=total_pages, current_page = current_page, m = 7)
+    current_user_role = get_user_role()
+    return render_template('monitor.html', records=paginated_data, total_pages=total_pages, current_page = current_page, m = 7,current_user_role=current_user_role)
 
 
 @app.route('/user_managerment', methods=['GET', 'POST'])
