@@ -480,7 +480,7 @@ def chart():
     # Tạo DataFrame mẫu (bạn có thể thay bằng get_record())
     df = get_record()
 
-    df_filtered = df[df["LABEL"] == 1]
+    df_filtered = df[df["label"] == 1]
 
     data = df_filtered.apply(lambda row: [row["IP"], row["EXTRACTED_IP"]], axis=1).tolist()
 
