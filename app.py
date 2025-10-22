@@ -69,7 +69,7 @@ def get_parameter():
         df.drop(columns=["_id"], inplace=True)
     return df
 def get_record():
-    ram_data = list(ram_collection.find().sort("TIME_RECEIVE", -1))
+    ram_data = list(ram_collection.find().sort("time_receive", -1))
     df = pd.DataFrame(ram_data)
     if "_id" in df.columns:
         df.drop(columns=["_id"], inplace=True)
@@ -146,7 +146,7 @@ def investigate_ip_stmnc(ip_str):
     results = {
         "IOC": ip_str,
         "Indicator ID": indicator_id,
-        "Indicator Description": indicator.get("description"),
+        "Indicator description": indicator.get("description"),
         "Malware": [],
         "Campaign": [],
         "Intrusion Set": []
@@ -575,10 +575,10 @@ def search_keyword():
 
 def get_detail_from_ram(mac):
     record = get_record()
-    matched_ram = record[record['MAC'] == mac]
+    matched_ram = record[record['mac'] == mac]
 
     if not matched_ram.empty:
-        return matched_ram.iloc[0]['IP'], matched_ram.iloc[0]['UNIT_NAME']
+        return matched_ram.iloc[0]['IP'], matched_ram.iloc[0]['unit_name']
     else:
         return 'Chưa xác định', 'Chưa xác định'
 # trả về giá trị của status và threat, id của record trong indicator. nếu rỗng thì trả về Na na none, thường là sẽ có
@@ -852,9 +852,9 @@ def export_file():
 @app.route("/import_file", methods=["POST"])
 def import_file():
     required_fields = [
-        "ALERT_LEVEL_ID", "ALERT_TYPE", "DESCRIPTION", "EXTRACTED_IP",
-        "IP", "LABEL", "MAC", "TIME_RECEIVE",
-        "UNIT_FULL_NAME", "UNIT_NAME", "USER_NAME"
+        "alert_level_id", "alert_type", "description", "EXTRACTED_IP",
+        "IP", "LABEL", "mac", "time_receive",
+        "unit_full_name", "unit_name", "user_name"
     ]
 
     if 'file' not in request.files:
@@ -910,9 +910,9 @@ def import_file():
 
 def import_file_2():
     required_fields = [
-        "ALERT_LEVEL_ID", "ALERT_TYPE", "DESCRIPTION", "EXTRACTED_IP",
-        "IP", "LABEL", "MAC", "TIME_RECEIVE",
-        "UNIT_FULL_NAME", "UNIT_NAME", "USER_NAME"
+        "alert_level_id", "alert_type", "description", "EXTRACTED_IP",
+        "IP", "LABEL", "mac", "time_receive",
+        "unit_full_name", "unit_name", "user_name"
     ]
 
     if 'file' not in request.files:
@@ -966,11 +966,11 @@ def overwrite_collection(df, collection_name):
     return ''
 
 def get_monthly_record_counts(df):
-    df["TIME_RECEIVE"] = pd.to_datetime(df["TIME_RECEIVE"])
+    df["time_receive"] = pd.to_datetime(df["time_receive"])
     today = datetime.today()
     months = [(today - timedelta(days=30*i)).strftime("%m/%Y") for i in range(12)]
     months.reverse()  
-    df["Month_Year"] = df["TIME_RECEIVE"].dt.strftime("%m/%Y")
+    df["Month_Year"] = df["time_receive"].dt.strftime("%m/%Y")
     record_counts = [df[df["Month_Year"] == month].shape[0] for month in months]
     return months, record_counts
 
@@ -1087,8 +1087,8 @@ def filtering(df, list):
     df_filtered = pd.DataFrame(columns = df.columns)
     for _,row in df.iterrows():
         a = row
-        if str(a['ALERT_TYPE']) == "Gray_ip" or str(a['ALERT_TYPE']) == "Gray_domain":
-            if any(key in str(a['DESCRIPTION']) for key in list):
+        if str(a['alert_type']) == "Gray_ip" or str(a['alert_type']) == "Gray_domain":
+            if any(key in str(a['description']) for key in list):
                 df_filtered = df_filtered._append(a, ignore_index = True)
     return df_filtered
 # Hàm filtering2, bỏ các white record, giữ lại black và gray
@@ -1096,7 +1096,7 @@ def filtering_2(df, list):
 	df_filtered = pd.DataFrame(columns = df.columns)
 	for _,row in df.iterrows():
 		a = row
-		if not any(key in str(a['DESCRIPTION']) for key in list):
+		if not any(key in str(a['description']) for key in list):
 			df_filtered = df_filtered._append(a, ignore_index = True)
 	return df_filtered
 
@@ -1104,7 +1104,7 @@ def match_miav_database(df_filtered):
     miav_database_df = get_miav_database()
     miav_ip_list = miav_database_df['IP'].tolist()
 
-    df_filtered['EXTRACTED_IP'] = df_filtered['DESCRIPTION'].str.replace("connect to ", "", regex=False)
+    df_filtered['EXTRACTED_IP'] = df_filtered['description'].str.replace("connect to ", "", regex=False)
 
     def check_match(value):
         return 1 if value in miav_ip_list else 0
@@ -1120,17 +1120,17 @@ def get_filter(formatted_date_1, formatted_date_2):
 	return filter,name
 
 def raw_to_df_goc(result):
-	data = {'MAC': [],'IP': [],'UNIT_NAME': [],'USER_NAME': [],'UNIT_FULL_NAME': [],'ALERT_TYPE': [],'ALERT_LEVEL_ID': [], 'TIME_RECEIVE': [],'DESCRIPTION': []}
+	data = {'mac': [],'IP': [],'unit_name': [],'user_name': [],'unit_full_name': [],'alert_type': [],'alert_level_id': [], 'time_receive': [],'description': []}
 	for record in result:
-		data['MAC'].append(str(record['mac']))
+		data['mac'].append(str(record['mac']))
 		data['IP'].append(str(record['ip']))
-		data['UNIT_NAME'].append(str(record['unit_full_name']))
-		data['USER_NAME'].append(str('Chua dinh danh'))
-		data['UNIT_FULL_NAME'].append(str(record['unit_full_name']))
-		data['ALERT_TYPE'].append(str(record['alert_type']))
-		data['ALERT_LEVEL_ID'].append(str(record['alert_level_id']))
-		data['TIME_RECEIVE'].append(str(record['time_receive']))
-		data['DESCRIPTION'].append(str(record.get('alert_info', {}).get('description', 'No description available')))
+		data['unit_name'].append(str(record['unit_full_name']))
+		data['user_name'].append(str('Chua dinh danh'))
+		data['unit_full_name'].append(str(record['unit_full_name']))
+		data['alert_type'].append(str(record['alert_type']))
+		data['alert_level_id'].append(str(record['alert_level_id']))
+		data['time_receive'].append(str(record['time_receive']))
+		data['description'].append(str(record.get('alert_info', {}).get('description', 'No description available')))
 	df = pd.DataFrame(data)
 	return df
 
@@ -1154,7 +1154,7 @@ def insert_with_limit_ram(data_list, limit=500000):
     insert_count = len(data_list)
     excess = (current_count + insert_count) - limit
     if excess > 0:
-        ram_collection.delete_many({}, limit=excess, sort=[("TIME_RECEIVE", 1)])
+        ram_collection.delete_many({}, limit=excess, sort=[("time_receive", 1)])
     ram_collection.insert_many(data_list)
 
 
@@ -1163,7 +1163,7 @@ def insert_with_limit_search(data_list, limit=500000):
     insert_count = len(data_list)
     excess = (current_count + insert_count) - limit
     if excess > 0:
-        search_history_collection.delete_many({}, limit=excess, sort=[("TIME_RECEIVE", 1)])
+        search_history_collection.delete_many({}, limit=excess, sort=[("time_receive", 1)])
     search_history_collection.insert_many(data_list)
 
 def core_goc():
@@ -1212,26 +1212,26 @@ def core_goc():
 def raw_to_df(response_json):
     records = response_json.get("data", {}).get("event", [])
     data = {
-        'MAC': [],
-        'IP': [],
-        'UNIT_NAME': [],
-        'USER_NAME': [],
-        'UNIT_FULL_NAME': [],
-        'ALERT_TYPE': [],
-        'ALERT_LEVEL_ID': [],
-        'TIME_RECEIVE': [],
-        'DESCRIPTION': []
+        'mac': [],
+        'ip': [],
+        'unit_name': [],
+        'user_name': [],
+        'unit_full_name': [],
+        'alert_type': [],
+        'alert_level_id': [],
+        'time_receive': [],
+        'description': []
     }
     for record in records:
-        data['MAC'].append(str(record.get('mac', '')))
+        data['mac'].append(str(record.get('mac', '')))
         data['IP'].append(str(record.get('ip', '')))
-        data['UNIT_NAME'].append(str(record.get('unit_full_name', '').split(' - ')[0]))
-        data['USER_NAME'].append("Chua dinh danh")
-        data['UNIT_FULL_NAME'].append(str(record.get('unit_full_name', '')))
-        data['ALERT_TYPE'].append(str(record.get('alert_type', '')))
-        data['ALERT_LEVEL_ID'].append(str(record.get('alert_level_id', '')))
-        data['TIME_RECEIVE'].append(str(record.get('time_receive', '')))
-        data['DESCRIPTION'].append(
+        data['unit_name'].append(str(record.get('unit_full_name', '').split(' - ')[0]))
+        data['user_name'].append("Chua dinh danh")
+        data['unit_full_name'].append(str(record.get('unit_full_name', '')))
+        data['alert_type'].append(str(record.get('alert_type', '')))
+        data['alert_level_id'].append(str(record.get('alert_level_id', '')))
+        data['time_receive'].append(str(record.get('time_receive', '')))
+        data['description'].append(
             str(record.get('alert_info', {}).get('description', 'No description available'))
         )
 
