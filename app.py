@@ -482,11 +482,11 @@ def chart():
 
     df_filtered = df[df["label"] == 1]
 
-    data = df_filtered.apply(lambda row: [row["IP"], row["EXTRACTED_IP"]], axis=1).tolist()
+    data = df_filtered.apply(lambda row: [row["ip"], row["extracted_ip"]], axis=1).tolist()
 
     # Tạo danh sách node với màu sắc tương ứng
-    internal_ips = df_filtered["IP"].unique().tolist()
-    external_iocs = df_filtered["EXTRACTED_IP"].unique().tolist()
+    internal_ips = df_filtered["ip"].unique().tolist()
+    external_iocs = df_filtered["extracted_ip"].unique().tolist()
 
     nodes = []
     for ip in internal_ips:
