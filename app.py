@@ -578,7 +578,7 @@ def get_detail_from_ram(mac):
     matched_ram = record[record['mac'] == mac]
 
     if not matched_ram.empty:
-        return matched_ram.iloc[0]['IP'], matched_ram.iloc[0]['unit_name']
+        return matched_ram.iloc[0]['ip'], matched_ram.iloc[0]['unit_name']
     else:
         return 'Chưa xác định', 'Chưa xác định'
 # trả về giá trị của status và threat, id của record trong indicator. nếu rỗng thì trả về Na na none, thường là sẽ có
@@ -792,44 +792,81 @@ def search_history_goc():
         search_history_collection.insert_one(record_to_insert)
     return '1'
 
-@app.route('/search_history', methods=['GET', 'POST'])
+
+
+@app.route('/search_history', methods=['GET', 'POST']) 
 @login_required
-def search_history():
-    print("vao ham")
+
+# Hàm search_history dùng cho việc gửi request đến FMS, lấy token, đọc response - hoạt động tốt
+
+# def search_history():
+#     print("vao ham")
+#     date_1 = request.form.get('date_1')
+#     date_2 = request.form.get('date_2')
+#     token = get_token()
+#     if not token:
+#         print("[!] Không lấy được token, chờ 10s rồi thử lại...")
+#         return '1'
+#     start_str = date_1
+#     end_str = date_2
+#     raw_data = get_event_data(token, start_str, end_str)
+#     print(raw_data)
+#     if raw_data is None:
+#         print('data is none')
+#         return '1'
+#     df = raw_to_df(raw_data)
+#     df_white_list = get_white_list()
+#     rule = df_white_list['ip'].tolist()
+#     df_filtered = filtering_2(df, rule)
+#     df_filtered_2 = match_miav_database(df_filtered)
+#     session['search_mode'] = True
+#     count = len(df_filtered)
+#     print(f"There are {count} alert for 300s from {date_1} to {date_2}")
+#     print('count')
+#     if len(df_filtered_2) > 0:
+
+#         record_to_insert = {
+#             "user_id": current_user.id,
+#             "data": df_filtered_2.to_dict(orient="records")
+#         }
+#         search_history_collection.insert_one(record_to_insert)
+#     return '1'
+def search_history_records():
+    """Tìm kiếm bản ghi trong ram_collection theo khoảng thời gian."""
     date_1 = request.form.get('date_1')
     date_2 = request.form.get('date_2')
-    token = get_token()
-    if not token:
-        print("[!] Không lấy được token, chờ 10s rồi thử lại...")
-        return '1'
-    start_str = date_1
-    end_str = date_2
-    raw_data = get_event_data(token, start_str, end_str)
-    print(raw_data)
-    if raw_data is None:
-        print('data is none')
-        return '1'
-    df = raw_to_df(raw_data)
-    df_white_list = get_white_list()
-    rule = df_white_list['ip'].tolist()
-    df_filtered = filtering_2(df, rule)
-    df_filtered_2 = match_miav_database(df_filtered)
-    session['search_mode'] = True
-    #print(df_filtered_2)
-    #update_other_parameter(len(df), 'query')
-    #update_chart_parameter(df_filtered)
-    count = len(df_filtered)
-    #update_other_parameter(count, 'detect')
-    print(f"There are {count} alert for 300s from {date_1} to {date_2}")
-    print('count')
-    if len(df_filtered_2) > 0:
 
-        record_to_insert = {
-            "user_id": current_user.id,
-            "data": df_filtered_2.to_dict(orient="records")
-        }
-        search_history_collection.insert_one(record_to_insert)
-    return '1'
+    if not date_1 or not date_2:
+        return jsonify({"success": False, "message": "Thiếu thông tin thời gian tìm kiếm"}), 400
+
+    try:
+        start_dt = datetime.strptime(date_1, "%Y-%m-%d %H:%M:%S")
+        end_dt = datetime.strptime(date_2, "%Y-%m-%d %H:%M:%S")
+    except ValueError:
+        return jsonify({"success": False, "message": "Sai định dạng thời gian (YYYY-MM-DD HH:MM:SS)"}), 400
+
+    # Tìm trong MongoDB (ram_collection)
+    query = {"time_receive": {"$gte": date_1, "$lte": date_2}}
+    result = list(ram_collection.find(query, {"_id": 0}))
+
+    if not result:
+        return jsonify({"success": True, "message": "Không có bản ghi trong khoảng thời gian này", "count": 0})
+
+    # Lưu lại kết quả tìm kiếm vào collection search_history
+    session['search_mode'] = True
+    record_to_insert = {
+        "user_id": current_user.id,
+        "data": result
+    }
+    search_history_collection.insert_one(record_to_insert)
+
+    return jsonify({
+        "success": True,
+        "message": f"Tìm thấy {len(result)} bản ghi trong khoảng {date_1} - {date_2}",
+        "count": len(result)
+    })
+
+
 
 @app.route("/export_file", methods=["GET"])
 def export_file():
