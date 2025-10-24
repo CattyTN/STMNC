@@ -17,7 +17,15 @@ tbody td {
   font-size: 12px;
 }
 
-
+.modal.show .modal-dialog{
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+.modal-dialog-centered{
+  min-height: 100vh !important;   /* thay vì calc(100% - 1rem) */
+  display: flex;
+  align-items: center;
+}
 
 .modal-body input, 
 .modal-body textarea, 
@@ -29,7 +37,8 @@ tbody td {
 .modal-body label {
   color: black !important; /* Đảm bảo nhãn có màu đen */
 }
-
+.content, .row, .col-md-12, .card { height: 100%; }
+.card-body { height: calc(100vh - 220px); overflow-y: auto; padding-bottom: 0; }
 </style>
 {% endblock stylesheets %}
 
@@ -150,6 +159,8 @@ tbody td {
 
 
   
+{% endblock content %}
+{% block modals %}
   <div class="modal fade" id="customModal_2" tabindex="-1" role="dialog" aria-labelledby="customModalLabel">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
@@ -189,8 +200,8 @@ tbody td {
       </div>
     </div>
   </div>
-{% endblock content %}
 
+{% endblock modals %}
 <!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
 
