@@ -786,7 +786,7 @@ function add_ioc_button() {
         addButton.addEventListener("click", function () {
             console.log("Nhật - Đang gửi dữ liệu");
 
-            var idValue = document.getElementById("id-input").value.trim();
+            //var idValue = document.getElementById("id-input").value.trim();
             var urlValue = document.getElementById("url-input").value.trim();
             var descriptionValue = document.getElementById("description-input").value.trim();
             var statusValue = document.getElementById("status-select").value;
@@ -795,7 +795,7 @@ function add_ioc_button() {
             var validFromValue = document.getElementById("valid-from").value;
             var validUntilValue = document.getElementById("valid-until").value;
 
-            if (!idValue || !urlValue ) {
+            if (!urlValue ) {
                 Swal.fire({
                     title: "Thiếu dữ liệu!",
                     text: "ID, C&C không được để trống.",
@@ -805,7 +805,7 @@ function add_ioc_button() {
             }
 
             var formData = {
-                id: idValue,
+                //id: idValue,
                 url: urlValue,
                 description: descriptionValue,
                 status: statusValue,

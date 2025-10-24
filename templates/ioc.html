@@ -17,7 +17,15 @@ tbody td {
   font-size: 12px;
 }
 
-
+.modal.show .modal-dialog{
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+.modal-dialog-centered{
+  min-height: 100vh !important;   /* thay vì calc(100% - 1rem) */
+  display: flex;
+  align-items: center;
+}
 
 .modal-body input, 
 .modal-body textarea, 
@@ -25,7 +33,8 @@ tbody td {
   color: black !important;  /* Đảm bảo chữ có màu đen */
   background-color: white !important;  /* Giữ nền trắng */
 }
-  
+
+
 .modal-body label {
   color: black !important; /* Đảm bảo nhãn có màu đen */
 }
@@ -43,6 +52,7 @@ html, body {
   overflow-y: auto;
   padding-bottom: 0;
 }
+
 </style>
 {% endblock stylesheets %}
 
@@ -66,7 +76,7 @@ html, body {
                 <thead class="text-primary">
                   <tr>
                     <th scope="col" class="sort col-3" >IOC</th>
-                    <th scope="col" class="sort col-3">TỔ CHỨC BÁO CÁO</th>
+                    <th scope="col" class="sort col-3">NGƯỜI/TỔ CHỨC BÁO CÁO</th>
                     <th scope="col" class="sort col-3">LOẠI MỐI ĐE DỌA</th>
                     <th scope="col" class="sort col-3">TRẠNG THÁI</th>
                   </tr>
@@ -75,9 +85,9 @@ html, body {
                   {% for index, row in indicator.iterrows() %}
                   <tr>
                     <td scope="col" class="sort col-2" style="font-size: 12px;">{{ row['url'] }}</td>
-                    <td scope="col" class="sort col-4" style="font-size: 12px;">{{ row['Reporter'] }}</td>
-                    <td scope="col" class="sort col-3" style="font-size: 12px;">{{ row['Threat'] }}</td>
-                    <td scope="col" class="sort col-2" style="font-size: 12px;">{{ row['Status'] }}</td>
+                    <td scope="col" class="sort col-4" style="font-size: 12px;">{{ row['reporter'] }}</td>
+                    <td scope="col" class="sort col-3" style="font-size: 12px;">{{ row['threat'] }}</td>
+                    <td scope="col" class="sort col-2" style="font-size: 12px;">{{ row['status'] }}</td>
                   </tr>
                   {% endfor %}
                 </tbody>
@@ -153,8 +163,11 @@ html, body {
 
 
   
-  <div class="modal fade" id="customModal" tabindex="-1" role="dialog" aria-labelledby="customModalLabel">
-    <div class="modal-dialog" role="document">
+  
+{% endblock content %}
+{% block modals %}
+<div class="modal fade" id="customModal" tabindex="-1" role="dialog" aria-labelledby="customModalLabel">
+    <div class="modal-dialog " role="document">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="customModalLabel">THÊM MỚI MỐI ĐE DỌA</h5>
@@ -163,6 +176,7 @@ html, body {
           </button>
         </div>
         <div class="modal-body " >
+          <!--
           <form>
             <div class="form-group">
               <label for="id-input" class="col-form-label">ID</label>
@@ -202,15 +216,62 @@ html, body {
               <input type="date" class="form-control" id="valid-until">
             </div>
           </form>
+          -->
+          <form>
+            <div class="form-row">
+              <div class="form-group col-md-12">
+                <label for="url-input" class="col-form-label">C&C</label>
+                <input type="text" class="form-control" id="url-input">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group col-md-6">
+                <label for="description-input" class="col-form-label">Mô tả</label>
+                <input type="text" class="form-control" id="description-input">
+              </div>
+              <div class="form-group col-md-6">
+                <label for="status-select" class="col-form-label">Trạng thái</label>
+                <select class="form-control" id="status-select">
+                  <option value="online">Online</option>
+                  <option value="offline">Offline</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group col-md-6">
+                <label for="threat-select" class="col-form-label">Loại</label>
+                <select class="form-control" id="threat-select">
+                  <option value="malware_download">Malware Download</option>
+                </select>
+              </div>
+              <div class="form-group col-md-6">
+                <label for="pattern-input" class="col-form-label">URL file mã độc</label>
+                <input type="text" class="form-control" id="pattern-input">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group col-md-6">
+                <label for="valid-from" class="col-form-label">Hoạt động từ</label>
+                <input type="date" class="form-control" id="valid-from">
+              </div>
+              <div class="form-group col-md-6">
+                <label for="valid-until" class="col-form-label">Dừng hoạt động</label>
+                <input type="date" class="form-control" id="valid-until">
+              </div>
+            </div>
+          </form>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-          <button type="button" id="add_ioc_button" class="btn btn-primary">Cập nhật</button>
+          <button type="button" id="add_ioc_button" class="btn btn-primary">Thêm</button>
         </div>
       </div>
     </div>
   </div>
-{% endblock content %}
+{% endblock modals %}
 
 <!-- Specific Page JS goes HERE  -->
 {% block javascripts %}

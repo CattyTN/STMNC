@@ -17,6 +17,7 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 import re
 from pymongo import MongoClient
 import urllib3
+import uuid
 app = Flask(__name__)
 app.secret_key = "your_secret_key"  
 socketio = SocketIO(app)
@@ -327,23 +328,26 @@ def ioc_page():
 @app.route('/add_ioc', methods=['GET', 'POST'])
 @login_required
 def add_ioc():
+    print("vao ham add ioc")
     data = request.get_json()
-    required_fields = ["id", "url"]
+    required_fields = [ "url"]
     for field in required_fields:
         if field not in data or not data[field]:
             return jsonify({"success": False, "message": f"Trường {field} không được để trống!"})
+    generated_id = str(uuid.uuid4())
     ioc_data = {
-        "_id": data["id"],  
+        "id": generated_id,  
         "url": data["url"],
         "description": data["description"],
-        "status": data.get("status", "N/A"),  
+        "status": data.get("status", "N/A"),
+        'reporter': current_user.id,  
         "threat": data.get("threat", "N/A"),
         "pattern": data.get("pattern", "N/A"),
         "valid_from": data.get("valid_from", "N/A"),
         "valid_until": data.get("valid_until", "N/A")
     }
     print(ioc_data)
-    #indicator_collection.insert_one(ioc_data)
+    indicator_collection.insert_one(ioc_data)
     return jsonify({"success": True, "message": "Thêm mới mối đe dọa thành công!"})
         
 
@@ -413,7 +417,8 @@ def user_managerment():
     total_pages = (len(user_data) + 7) // 7
     first_page_data = user_data.iloc[:7]
     m = 7
-    return render_template('user_managerment.html', records=first_page_data, total_pages=total_pages, current_page = 1, m = 7)
+    current_user_role = get_user_role()
+    return render_template('user_managerment.html', records=first_page_data, total_pages=total_pages, current_page = 1, m = 7,current_user_role=current_user_role)
 
 @app.route('/user_managerment_page', methods=['GET', 'POST'])
 @login_required
@@ -427,7 +432,8 @@ def user_managerment_page():
     start = (current_page - 1) * 7  
     end = start + 7 
     paginated_data = user_data.iloc[start:end]
-    return render_template('user_managerment.html', records=paginated_data, total_pages=total_pages, current_page = current_page, m = 7)
+    current_user_role = get_user_role()
+    return render_template('user_managerment.html', records=paginated_data, total_pages=total_pages, current_page = current_page, m = 7,current_user_role=current_user_role)
 
 
 @app.route('/add_user', methods=['GET', 'POST'])
@@ -505,8 +511,8 @@ def chart():
                 "fillColor": "#E8544E"  # Xanh: IOC
             }
         })
-
-    return render_template("chart.html", data=data, nodes=nodes)
+    current_user_role = get_user_role()
+    return render_template("chart.html", data=data, nodes=nodes, current_user_role=current_user_role)
 
 @app.route('/search_and_backup', methods=['GET', 'POST'])
 @login_required
@@ -517,7 +523,8 @@ def search_and_backup():
     total_pages = (len(records) + 7) // 7
     first_page_data = records.iloc[:7]
     a = len(records)
-    return render_template('search_and_backup.html', records=first_page_data, total_pages=total_pages, current_page = 1, a = a)
+    current_user_role = get_user_role()
+    return render_template('search_and_backup.html', records=first_page_data, total_pages=total_pages, current_page = 1, a = a, current_user_role=current_user_role)
 
 @app.route('/search_and_backup_page', methods=['GET', 'POST'])
 @login_required
@@ -531,7 +538,8 @@ def search_and_backup_page():
     start = (current_page - 1) * 7  
     end = start + 7 
     paginated_data = records.iloc[start:end]
-    return render_template('search_and_backup.html', records=paginated_data, total_pages=total_pages, current_page = current_page, m = 7)
+    current_user_role = get_user_role()
+    return render_template('search_and_backup.html', records=paginated_data, total_pages=total_pages, current_page = current_page, m = 7, current_user_role=current_user_role)
 
 @app.route('/search_keyword', methods=['POST'])
 def search_keyword():
@@ -889,8 +897,8 @@ def export_file():
 @app.route("/import_file", methods=["POST"])
 def import_file():
     required_fields = [
-        "alert_level_id", "alert_type", "description", "EXTRACTED_IP",
-        "IP", "LABEL", "mac", "time_receive",
+        "alert_level_id", "alert_type", "description", "extracted_ip",
+        "ip", "label", "mac", "time_receive",
         "unit_full_name", "unit_name", "user_name"
     ]
 
@@ -1020,7 +1028,7 @@ def delete_collection(collection):
 def update_chart_parameter(df_new):
     df = pd.read_excel(chart_path)
     for index, row in df_new.iterrows():
-        ip = row['IP']
+        ip = row['ip']
         if ip in df['ip'].values:
             df.loc[df['ip'] == ip, 'count'] += 1
         else:
