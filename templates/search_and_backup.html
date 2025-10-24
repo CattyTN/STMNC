@@ -18,7 +18,19 @@ tbody td {
   vertical-align: middle;        
   font-size: 12px;
 }
-.card-body { height: calc(100vh - 220px); overflow-y: auto; }
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+.content, .row, .col-md-12, .card {
+  height: 100%;
+}
+.card-body {
+  height: calc(100vh - 220px); /* Điều chỉnh số px cho vừa header/footer */
+  overflow-y: auto;
+  padding-bottom: 0;
+}
 </style>
 
 {% endblock stylesheets %}
