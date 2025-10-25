@@ -102,7 +102,7 @@ html, body {
                     <td scope="col" class="sort col-2" style="font-size: 12px; background-color: #ff3232;">{{ row['mac'] }}</td>
                     <td scope="col" class="sort col-2" style="font-size: 12px; background-color: #ff3232;">{{ row['time_receive'] }}</td>
                     <td scope="col" class="sort col-4" style="font-size: 12px; background-color: #ff3232;">{{ row['unit_full_name'] }}</td>
-                    <td scope="col" class="sort col-3" style="font-size: 12px; background-color: #ff3232; "><a href="{{ url_for('detail', ioc=row['extracted_ip'], mac=row['mac']) }}" style="color:#2e2434;">{{ row['description'] }} (MiAV)</a></td>
+                    <td scope="col" class="sort col-3" style="font-size: 12px; background-color: #ff3232; "><a href="{{ url_for('detail', ioc=row['extracted_ip'], mac=row['mac']) }}" style="color:#2e2434;">{{ row['description'] }}</a></td>
                   </tr>
                   {%else%}
                   <tr>

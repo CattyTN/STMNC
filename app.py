@@ -324,6 +324,62 @@ def ioc_page():
     current_user_role = get_user_role()
     return render_template('ioc.html', indicator=paginated_data, total_pages=total_pages, current_page = current_page, m = 7, current_user_role=current_user_role)
 
+def relabel_all_search_and_backup(ioc_url):
+    """
+    Reset toàn bộ label=0 trước, rồi gắn lại label=1
+    cho các bản ghi trùng IOC (mọi user).
+    """
+
+    # Bước 1: Reset tất cả label = 0
+    search_and_backup_collection.update_many(
+        {},
+        {"$set": {"data.$[].label": 0, "searched_data.$[].label": 0}}
+    )
+
+    # Bước 2: Gán 1 cho các phần tử trùng IOC
+    r1 = search_and_backup_collection.update_many(
+        {"data": {"$elemMatch": {"$or": [
+            {"ip": ioc_url},
+            {"extracted_ip": ioc_url}
+        ]}}},
+        {"$set": {"data.$[e].label": 1}},
+        array_filters=[{"$or": [
+            {"e.ip": ioc_url},
+            {"e.extracted_ip": ioc_url}
+        ]}]
+    )
+
+    r2 = search_and_backup_collection.update_many(
+        {"searched_data": {"$elemMatch": {"$or": [
+            {"ip": ioc_url},
+            {"extracted_ip": ioc_url}
+        ]}}},
+        {"$set": {"searched_data.$[e].label": 1}},
+        array_filters=[{"$or": [
+            {"e.ip": ioc_url},
+            {"e.extracted_ip": ioc_url}
+        ]}]
+    )
+
+    total = (r1.modified_count or 0) + (r2.modified_count or 0)
+    print(f"[INFO] Reset toàn bộ label=0 và cập nhật {total} bản ghi trùng IOC.")
+    return total
+
+def relabel_existing_records(ioc_url):
+    """Reset toàn bộ label=0, rồi gắn label=1 cho các bản ghi trùng IOC."""
+    print(f"[INFO] Bắt đầu gắn nhãn cho {ioc_url}")
+
+    # Reset label = 0 cho tất cả
+    ram_collection.update_many({}, {"$set": {"label": 0}})
+
+    # Gắn label = 1 cho record trùng extracted_ip
+    matched = ram_collection.update_many(
+        {"extracted_ip": ioc_url},
+        {"$set": {"label": 1}}
+    ).modified_count
+
+    print(f"[INFO] Đã gắn label=1 cho {matched} bản ghi trùng IOC {ioc_url}.")
+    return matched
 
 @app.route('/add_ioc', methods=['GET', 'POST'])
 @login_required
@@ -346,7 +402,8 @@ def add_ioc():
         "valid_from": data.get("valid_from", "N/A"),
         "valid_until": data.get("valid_until", "N/A")
     }
-    print(ioc_data)
+    matched_count = relabel_existing_records(data["url"])
+    matched_count = relabel_all_search_and_backup(data["url"])
     indicator_collection.insert_one(ioc_data)
     return jsonify({"success": True, "message": "Thêm mới mối đe dọa thành công!"})
         
@@ -955,8 +1012,8 @@ def import_file():
 
 def import_file_2():
     required_fields = [
-        "alert_level_id", "alert_type", "description", "EXTRACTED_IP",
-        "IP", "LABEL", "mac", "time_receive",
+        "alert_level_id", "alert_type", "description", "extracted_ip",
+        "ip", "label", "mac", "time_receive",
         "unit_full_name", "unit_name", "user_name"
     ]
 
@@ -1149,11 +1206,11 @@ def match_miav_database(df_filtered):
     miav_database_df = get_miav_database()
     miav_ip_list = miav_database_df['IP'].tolist()
 
-    df_filtered['EXTRACTED_IP'] = df_filtered['description'].str.replace("connect to ", "", regex=False)
+    df_filtered['extracted_ip'] = df_filtered['description'].str.replace("connect to ", "", regex=False)
 
     def check_match(value):
         return 1 if value in miav_ip_list else 0
-    df_filtered['LABEL'] = df_filtered['EXTRACTED_IP'].apply(check_match)
+    df_filtered['label'] = df_filtered['extracted_ip'].apply(check_match)
     print(df_filtered)
     return df_filtered
     
