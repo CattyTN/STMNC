@@ -1468,6 +1468,19 @@ def logout():
 def protected():
     return f'Logged in as: {current_user.id}'
 
+@app.route('/export_report', methods=['POST'])
+def export_report():
+    data = request.get_json(silent=True) or {}
+    start = data.get('from') or data.get('start')
+    end = data.get('to') or data.get('end')
+    # In ra console
+    print(f"Export report requested - start: {start}, end: {end}")
+    # Ghi vào logger nếu cần
+    try:
+        current_app.logger.info(f"Lỗi xuất báo cáo - start: {start}, end: {end}")
+    except Exception:
+        pass
+    return jsonify({'status': 'ok', 'start': start, 'end': end}), 200
 
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=5000, debug=True)

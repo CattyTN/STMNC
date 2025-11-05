@@ -47,8 +47,14 @@
                 </li>
                 <li class="{% if 'tables' in segment %} active {% endif %}" >
                     <a href="/search_and_backup">
-                        <i class="tim-icons icon-single-02" style="color: black;"></i>
+                        <i class="tim-icons icon-zoom-split" style="color: black;"></i>
                         <p  style="color: black;"><strong>Tìm kiếm và sao lưu</strong></p>
+                    </a>
+                </li>
+                <li class="{% if 'tables' in segment %} active {% endif %}" >
+                    <a href="#" id="export_report_link">
+                        <i class="tim-icons icon-paper" style="color: black;"></i>
+                        <p  style="color: black;"><strong>Xuất báo cáo</strong></p>
                     </a>
                 </li>
                 <li>
@@ -60,3 +66,93 @@
             </ul>
         </div>
     </div>
+<div class="modal fade" id="exportReportModal" tabindex="-1" role="dialog" aria-labelledby="exportReportModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exportReportModalLabel">Xuất báo cáo</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Đóng">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="datetimepicker_export_1">Từ ngày</label>
+          <input type="text" id="datetimepicker_export_1" class="form-control" placeholder="Từ ngày" />
+        </div>
+        <div class="form-group">
+          <label for="datetimepicker_export_2">Đến ngày</label>
+          <input type="text" id="datetimepicker_export_2" class="form-control" placeholder="Đến ngày" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+        <button type="button" class="btn btn-primary" id="export_report_confirm">Xuất</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Hiển thị modal khi click vào "Xuất báo cáo"
+  document.addEventListener('DOMContentLoaded', function () {
+    var exportLink = document.getElementById('export_report_link');
+    if (exportLink) {
+      exportLink.addEventListener('click', function (e) {
+        e.preventDefault();
+        // nếu dùng Bootstrap 4/5: dùng jQuery nếu đã có, fallback sang show class nếu không có
+        if (window.jQuery && typeof jQuery('#exportReportModal').modal === 'function') {
+          jQuery('#exportReportModal').modal('show');
+        } else {
+          var modal = document.getElementById('exportReportModal');
+          modal.classList.add('show');
+          modal.style.display = 'block';
+          modal.setAttribute('aria-modal', 'true');
+        }
+      });
+    }
+
+    // Init tempusDominus pickers (giống monitor.html nhưng dùng id khác để tránh trùng)
+    try {
+      if (window.tempusDominus) {
+        new tempusDominus.TempusDominus(document.getElementById('datetimepicker_export_1'), {
+          display: { components: { calendar: true, date: true, month: true, year: true, decades: true, clock: true, hours: true, minutes: true, seconds: true } },
+          localization: { format: 'yyyy-MM-dd HH:mm:ss', hourCycle: 'h23' }
+        });
+        new tempusDominus.TempusDominus(document.getElementById('datetimepicker_export_2'), {
+          display: { components: { calendar: true, date: true, month: true, year: true, decades: true, clock: true, hours: true, minutes: true, seconds: true } },
+          localization: { format: 'yyyy-MM-dd HH:mm:ss', hourCycle: 'h23' }
+        });
+      }
+    } catch (e) {
+      console.warn('TempusDominus init failed:', e);
+    }
+
+    // Nút xác nhận xuất báo cáo — gửi dữ liệu về server (ví dụ)
+    var exportBtn = document.getElementById('export_report_confirm');
+    if (exportBtn) {
+      exportBtn.addEventListener('click', function () {
+        var from = document.getElementById('datetimepicker_export_1').value;
+        var to = document.getElementById('datetimepicker_export_2').value;
+        // Thay bằng endpoint thực tế nếu cần
+        fetch('/export_report', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ from: from, to: to })
+        }).then(function (r) {
+          // đóng modal khi xong
+          if (window.jQuery && typeof jQuery('#exportReportModal').modal === 'function') {
+            jQuery('#exportReportModal').modal('hide');
+          } else {
+            var modal = document.getElementById('exportReportModal');
+            modal.classList.remove('show');
+            modal.style.display = 'none';
+          }
+        }).catch(function (err) {
+          console.error(err);
+        });
+      });
+    }
+  });
+</script>
