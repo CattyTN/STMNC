@@ -366,7 +366,6 @@ def ioc():
 @login_required
 def ioc_page():
     current_page = int(request.args.get("page", 1))  # Lấy số trang từ URL
-    print(current_page)
     indicator = get_indicator()
     indicator = indicator.fillna("N/A").replace("", "N/A")
 
@@ -376,6 +375,27 @@ def ioc_page():
     paginated_data = indicator.iloc[start:end]
     current_user_role = get_user_role()
     return render_template('ioc.html', indicator=paginated_data, total_pages=total_pages, current_page = current_page, m = 7, current_user_role=current_user_role)
+
+@app.route('/delete_ioc', methods=['POST'])
+@login_required
+@admin_required
+def delete_ioc():
+    print("vao ham delete ioc")
+    data = request.get_json()
+    ioc_id = data.get("id")
+
+    if not ioc_id:
+        return jsonify({"success": False, "message": "Thiếu ID IOC!"}), 400
+
+    result = indicator_collection.delete_one({"id": ioc_id})
+    print("---------------------")
+    print("ioc_id", ioc_id)
+
+    if result.deleted_count == 0:
+        return jsonify({"success": False, "message": "Không tìm thấy IOC để xóa!"}), 404
+
+    return jsonify({"success": True, "message": "Xóa IOC thành công!"})
+
 
 def relabel_all_search_and_backup(ioc_url):
     """

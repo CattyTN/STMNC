@@ -77,17 +77,25 @@ html, body {
                   <tr>
                     <th scope="col" class="sort col-3" >IOC</th>
                     <th scope="col" class="sort col-3">NGƯỜI/TỔ CHỨC BÁO CÁO</th>
-                    <th scope="col" class="sort col-3">LOẠI MỐI ĐE DỌA</th>
-                    <th scope="col" class="sort col-3">TRẠNG THÁI</th>
+                    <th scope="col" class="sort col-2">LOẠI MỐI ĐE DỌA</th>
+                    <th scope="col" class="sort col-2">TRẠNG THÁI</th>
+                    <th scope="col" class="sort col-1">XÓA</th>
                   </tr>
                 </thead>
                 <tbody id="table-body">
                   {% for index, row in indicator.iterrows() %}
                   <tr>
-                    <td scope="col" class="sort col-2" style="font-size: 12px;">{{ row['url'] }}</td>
-                    <td scope="col" class="sort col-4" style="font-size: 12px;">{{ row['reporter'] }}</td>
-                    <td scope="col" class="sort col-3" style="font-size: 12px;">{{ row['threat'] }}</td>
-                    <td scope="col" class="sort col-2" style="font-size: 12px;">{{ row['status'] }}</td>
+                    <td class="sort col-3" style="font-size: 12px;">{{ row['url'] }}</td>
+                    <td class="sort col-3" style="font-size: 12px;">{{ row['reporter'] }}</td>
+                    <td class="sort col-3" style="font-size: 12px;">{{ row['threat'] }}</td>
+                    <td class="sort col-2" style="font-size: 12px;">{{ row['status'] }}</td>
+
+                    <!-- Cột XÓA theo ID -->
+                    <td class="sort col-1" style="font-size: 12px;">
+                      <a href="#" class="delete-ioc" data-ioc-id="{{ row['id'] }}">
+                        <i class="tim-icons icon-trash-simple"></i>
+                      </a>
+                    </td>
                   </tr>
                   {% endfor %}
                 </tbody>

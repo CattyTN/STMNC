@@ -950,7 +950,7 @@ window.addEventListener('load', function(){
 
 
 function delete_user() {
-    var delButtons = document.querySelectorAll(".icon-trash-simple"); // Lấy tất cả icon
+    var delButtons = document.querySelectorAll(".icon-trash-simple.user"); // Lấy tất cả icon
     
     delButtons.forEach(delButton => { 
         delButton.addEventListener("click", function() {
@@ -1369,6 +1369,54 @@ function edit_user() {
                 title: "Lỗi!",
                 text: "Không thể kết nối đến server.",
                 icon: "error"
+            });
+        });
+    });
+}
+
+// XÓA IOC
+window.addEventListener('load', function () {
+    delete_ioc_listener();
+});
+
+function delete_ioc_listener() {
+    var buttons = document.querySelectorAll(".delete-ioc");
+    if (!buttons.length) return;
+
+    buttons.forEach(function(btn) {
+        btn.addEventListener("click", function (e) {
+            e.preventDefault();
+
+            var ioc_id = this.dataset.iocId;
+
+
+            Swal.fire({
+                title: "Xóa IOC?",
+                text: "Bạn chắc chắn muốn xóa IOC này khỏi hệ thống?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Xóa",
+                cancelButtonText: "Hủy"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch("/delete_ioc", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ id: ioc_id })
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire("Đã xóa!", data.message, "success")
+                                .then(() => location.reload());
+                        } else {
+                            Swal.fire("Lỗi", data.message, "error");
+                        }
+                    })
+                    .catch(() => {
+                        Swal.fire("Lỗi", "Không thể kết nối đến server.", "error");
+                    });
+                }
             });
         });
     });
