@@ -2,7 +2,6 @@
 
 {% block title %} Tables {% endblock %} 
 
-<!-- Specific Page CSS goes HERE  -->
 {% block stylesheets %}
 <style>
 table {
@@ -12,8 +11,8 @@ table {
 
 thead th,
 tbody td {
-  text-align: center !important; /* Căn giữa ngang */
-  vertical-align: middle;        /* Căn giữa dọc */
+  text-align: center !important;
+  vertical-align: middle;
   font-size: 12px;
 }
 
@@ -22,7 +21,7 @@ tbody td {
   margin-bottom: 0 !important;
 }
 .modal-dialog-centered{
-  min-height: 100vh !important;   /* thay vì calc(100% - 1rem) */
+  min-height: 100vh !important;
   display: flex;
   align-items: center;
 }
@@ -30,13 +29,12 @@ tbody td {
 .modal-body input, 
 .modal-body textarea, 
 .modal-body select {
-  color: black !important;  /* Đảm bảo chữ có màu đen */
-  background-color: white !important;  /* Giữ nền trắng */
+  color: black !important;
+  background-color: white !important;
 }
 
-
 .modal-body label {
-  color: black !important; /* Đảm bảo nhãn có màu đen */
+  color: black !important;
 }
 
 html, body {
@@ -48,24 +46,23 @@ html, body {
   height: 100%;
 }
 .card-body {
-  height: calc(100vh - 220px); /* Điều chỉnh số px cho vừa header/footer */
+  height: calc(100vh - 220px);
   overflow-y: auto;
   padding-bottom: 0;
 }
 
+/* Nút giám sát (giữ nguyên nếu vẫn dùng) */
 .ioc-toggle-btn {
   position: relative;
   width: 46px;
   height: 24px;
   border: none;
   border-radius: 24px;
-  background-color: #b0b0b0; /* OFF: xám */
+  background-color: #b0b0b0;
   cursor: pointer;
   padding: 0;
   outline: none;
 }
-
-/* nút tròn bên trong */
 .ioc-toggle-btn::before {
   content: "";
   position: absolute;
@@ -77,16 +74,12 @@ html, body {
   top: 3px;
   transition: transform 0.25s ease, background-color 0.25s ease;
 }
-
-/* trạng thái ON */
 .ioc-toggle-btn.on {
-  background-color: #00c853; /* xanh lá */
+  background-color: #00c853;
 }
-
 .ioc-toggle-btn.on::before {
   transform: translateX(22px);
 }
-
 </style>
 {% endblock stylesheets %}
 
@@ -100,50 +93,75 @@ html, body {
             <h4 class="card-title"><strong> CƠ SỞ DỮ LIỆU MỐI ĐE DỌA</strong></h4>
             {% if current_user_role == 'admin' %}
             <label class="btn btn-sm btn-default active" id="0">
-              <span class="d-none d-sm-block d-md-block d-lg-block d-xl-block" data-toggle="modal" data-target="#customModal">Thêm mới</span>
-          </label>
-          {%endif%}
+              <span id="open_add_ioc_modal"
+                    class="d-none d-sm-block d-md-block d-lg-block d-xl-block"
+                    data-toggle="modal" data-target="#customModal">
+                Thêm mới
+              </span>
+            </label>
+            {% endif %}
           </div>
           <div class="card-body">
             <div class="table-responsive overflow-auto">
               <table class="table tablesorter align-items-center" id="">
                 <thead class="text-primary">
                   <tr>
-                    <th scope="col" class="sort col-2" >IOC</th>
+                    <th scope="col" class="sort col-2">IOC</th>
                     <th scope="col" class="sort col-3">NGƯỜI/TỔ CHỨC BÁO CÁO</th>
-                    <th scope="col" class="sort col-2">LOẠI MỐI ĐE DỌA</th>
-                    <th scope="col" class="sort col-2">TRẠNG THÁI</th>
+                    <th scope="col" class="sort col-3">LOẠI MỐI ĐE DỌA</th>
+                    <!-- ĐỔI TRẠNG THÁI → SỬA -->
+                    <th scope="col" class="sort col-1">SỬA</th>
                     <th scope="col" class="sort col-1">GIÁM SÁT</th>
                     <th scope="col" class="sort col-1">XÓA</th>
                   </tr>
                 </thead>
                 <tbody id="table-body">
-                  {% for index, row in indicator.iterrows() %}
-                  <tr>
-                    <td class="sort col-2" style="font-size: 12px;">{{ row['url'] }}</td>
-                    <td class="sort col-3" style="font-size: 12px;">{{ row['reporter'] }}</td>
-                    <td class="sort col-3" style="font-size: 12px;">{{ row['threat'] }}</td>
-                    <td class="sort col-2" style="font-size: 12px;">{{ row['status'] }}</td>
-    <!-- Nút ON/OFF, KHÔNG dùng checkbox để khỏi đụng theme -->
-                    <td class="sort col-2" style="font-size: 12px;">
-                      <button type="button"
-                              class="ioc-toggle-btn"
-                              data-ioc-id="{{ row['id'] }}"
-                              data-status="{{ row['status'] }}">
-                      </button>
-                    </td>
-                    <!-- Cột XÓA theo ID -->
-                    <td class="sort col-1" style="font-size: 12px;">
-                      <a href="#" class="delete-ioc" data-ioc-id="{{ row['id'] }}">
-                        <i class="tim-icons icon-trash-simple"></i>
-                      </a>
-                    </td>
-                  </tr>
-                  {% endfor %}
-                </tbody>
+  {% for index, row in indicator.iterrows() %}
+  <tr>
+    <td class="sort col-2" style="font-size: 12px;">{{ row['url'] }}</td>
+    <td class="sort col-3" style="font-size: 12px;">{{ row['reporter'] }}</td>
+    <td class="sort col-3" style="font-size: 12px;">{{ row['threat'] }}</td>
+
+    <!-- CỘT SỬA: dùng modal EDIT riêng -->
+    <td class="sort col-1" style="font-size: 12px;">
+      <a href="#"
+         class="edit-ioc"
+         data-toggle="modal"
+         data-target="#customModalEdit"
+         data-ioc-id="{{ row['id'] }}"
+         data-url="{{ row['url'] }}"
+         data-description="{{ row['description'] if 'description' in row else '' }}"
+         data-status="{{ row['status'] }}"
+         data-threat="{{ row['threat'] }}"
+         data-pattern="{{ row['pattern'] if 'pattern' in row else '' }}"
+         data-valid-from="{{ row['valid_from'] if 'valid_from' in row else '' }}"
+         data-valid-until="{{ row['valid_until'] if 'valid_until' in row else '' }}">
+        <i class="tim-icons icon-pencil"></i>
+      </a>
+    </td>
+
+    <!-- CỘT GIÁM SÁT (TOGGLE) -->
+    <td class="sort col-1" style="font-size: 12px;">
+      <button type="button"
+              class="ioc-toggle-btn"
+              data-ioc-id="{{ row['id'] }}"
+              data-status="{{ row['status'] }}">
+      </button>
+    </td>
+
+    <!-- CỘT XÓA -->
+    <td class="sort col-1" style="font-size: 12px;">
+      <a href="#" class="delete-ioc" data-ioc-id="{{ row['id'] }}">
+        <i class="tim-icons icon-trash-simple"></i>
+      </a>
+    </td>
+  </tr>
+  {% endfor %}
+</tbody>
               </table>
             </div>
           </div>
+
           <div class="card-footer py-4">
             <nav aria-label="...">
               <ul class="pagination justify-content-end mb-0">
@@ -159,14 +177,12 @@ html, body {
                       {% if total_pages > 1 %}<li class="page-item"><a class="page-link ioc" style="color:black;" href="#" id ='page_2'>2</a></li>{% endif %}
                       {% if total_pages > 3 %}<li class="page-item disabled"><a class="page-link ioc" style="color:black;">...</a></li>{% endif %}
                       <li class="page-item"><a class="page-link ioc" style="color:black;" href="#" id="page_{{ total_pages }}">{{ total_pages }}</a></li>
-              
                   {% elif current_page == 2 %}
                       <li class="page-item"><a class="page-link ioc" style="color:black;" href="#" id ='page_1'>1</a></li>
                       <li class="page-item active"><a class="page-link ioc" style="color:black;" href="#" id ='page_2'>2</a></li>
                       {% if total_pages > 2 %}<li class="page-item"><a class="page-link ioc" style="color:black;" href="#" id ='page_3'>3</a></li>{% endif %}
                       {% if total_pages > 4 %}<li class="page-item disabled"><a class="page-link ioc" style="color:black;">...</a></li>{% endif %}
                       <li class="page-item"><a class="page-link ioc" style="color:black;" href="#" id="page_{{ total_pages }}">{{ total_pages }}</a></li>
-              
                   {% elif current_page == 3 %}
                       <li class="page-item"><a class="page-link ioc" style="color:black;" href="#" id ='page_1'>1</a></li>
                       <li class="page-item"><a class="page-link ioc" style="color:black;" href="#" id ='page_2'>2</a></li>
@@ -174,7 +190,6 @@ html, body {
                       {% if total_pages > 3 %}<li class="page-item"><a class="page-link ioc" style="color:black;" href="#" id ='page_4'>4</a></li>{% endif %}
                       {% if total_pages > 5 %}<li class="page-item disabled"><a class="page-link ioc" style="color:black;">...</a></li>{% endif %}
                       <li class="page-item"><a class="page-link ioc" style="color:black;" href="#" id="page_{{ total_pages }}">{{ total_pages }}</a></li>
-              
                   {% elif ((current_page > 3) and (current_page < (total_pages - 1)))  %}
                       <li class="page-item"><a class="page-link ioc" style="color:black;" href="#" id ='page_1'>1</a></li>
                       <li class="page-item disabled"><a class="page-link ioc" style="color:black;">...</a></li>
@@ -195,7 +210,6 @@ html, body {
                       <li class="page-item"><a class="page-link ioc" style="color:black;" href="#" id="page_{{ current_page - 1 }}">{{ current_page - 1 }}</a></li>
                       <li class="page-item active"><a class="page-link " style="color:black;" href="#" id="page_{{ total_pages }}">{{ total_pages }}</a></li>
                   {% endif %}
-
               </ul>
                 <li class="page-item disabled">
                   <a class="page-link ioc" href="#">
@@ -206,127 +220,163 @@ html, body {
               </ul>
             </nav>
           </div>
+
         </div>
       </div>
     </div>
   </div>
 
-
-  
-  
 {% endblock content %}
+
 {% block modals %}
+
+{# MODAL THÊM MỚI – GIỮ ĐÚNG ID CŨ ĐỂ CODE THÊM HOẠT ĐỘNG #}
 <div class="modal fade" id="customModal" tabindex="-1" role="dialog" aria-labelledby="customModalLabel">
-    <div class="modal-dialog " role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="customModalLabel">THÊM MỚI MỐI ĐE DỌA</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span >&times;</span>
-          </button>
-        </div>
-        <div class="modal-body " >
-          <!--
-          <form>
-            <div class="form-group">
-              <label for="id-input" class="col-form-label">ID</label>
-              <input type="text" class="form-control" id="id-input">
-            </div>
-            <div class="form-group">
+  <div class="modal-dialog " role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="customModalLabel">THÊM MỚI MỐI ĐE DỌA</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span>&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="ioc-form-add">
+          <div class="form-row">
+            <div class="form-group col-md-12">
               <label for="url-input" class="col-form-label">C&C</label>
               <input type="text" class="form-control" id="url-input">
             </div>
-            <div class="form-group">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col-md-6">
               <label for="description-input" class="col-form-label">Mô tả</label>
               <input type="text" class="form-control" id="description-input">
             </div>
-            <div class="form-group">
+            <div class="form-group col-md-6">
               <label for="status-select" class="col-form-label">Trạng thái</label>
               <select class="form-control" id="status-select">
                 <option value="online">Online</option>
                 <option value="offline">Offline</option>
               </select>
             </div>
-            <div class="form-group">
-              <label for="threat-select" class="col-form-label">Mối đe dọa</label>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label for="threat-select" class="col-form-label">Loại</label>
               <select class="form-control" id="threat-select">
                 <option value="malware_download">Malware Download</option>
               </select>
             </div>
-            <div class="form-group">
-              <label for="pattern-input" class="col-form-label">Pattern</label>
+            <div class="form-group col-md-6">
+              <label for="pattern-input" class="col-form-label">URL file mã độc</label>
               <input type="text" class="form-control" id="pattern-input">
             </div>
-            <div class="form-group">
-              <label for="valid-from" class="col-form-label">Hợp lệ từ</label>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label for="valid-from" class="col-form-label">Hoạt động từ</label>
               <input type="date" class="form-control" id="valid-from">
             </div>
-            <div class="form-group">
-              <label for="valid-until" class="col-form-label">Hợp lệ đến</label>
+            <div class="form-group col-md-6">
+              <label for="valid-until" class="col-form-label">Dừng hoạt động</label>
               <input type="date" class="form-control" id="valid-until">
             </div>
-          </form>
-          -->
-          <form>
-            <div class="form-row">
-              <div class="form-group col-md-12">
-                <label for="url-input" class="col-form-label">C&C</label>
-                <input type="text" class="form-control" id="url-input">
-              </div>
-            </div>
-
-            <div class="form-row">
-              <div class="form-group col-md-6">
-                <label for="description-input" class="col-form-label">Mô tả</label>
-                <input type="text" class="form-control" id="description-input">
-              </div>
-              <div class="form-group col-md-6">
-                <label for="status-select" class="col-form-label">Trạng thái</label>
-                <select class="form-control" id="status-select">
-                  <option value="online">Online</option>
-                  <option value="offline">Offline</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="form-row">
-              <div class="form-group col-md-6">
-                <label for="threat-select" class="col-form-label">Loại</label>
-                <select class="form-control" id="threat-select">
-                  <option value="malware_download">Malware Download</option>
-                </select>
-              </div>
-              <div class="form-group col-md-6">
-                <label for="pattern-input" class="col-form-label">URL file mã độc</label>
-                <input type="text" class="form-control" id="pattern-input">
-              </div>
-            </div>
-
-            <div class="form-row">
-              <div class="form-group col-md-6">
-                <label for="valid-from" class="col-form-label">Hoạt động từ</label>
-                <input type="date" class="form-control" id="valid-from">
-              </div>
-              <div class="form-group col-md-6">
-                <label for="valid-until" class="col-form-label">Dừng hoạt động</label>
-                <input type="date" class="form-control" id="valid-until">
-              </div>
-            </div>
-          </form>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-          <button type="button" id="add_ioc_button" class="btn btn-primary">Thêm</button>
-        </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+        <button type="button" id="add_ioc_button" class="btn btn-primary">Thêm</button>
       </div>
     </div>
   </div>
+</div>
+
+{# MODAL SỬA RIÊNG – ID MỚI, KHÔNG ĐỤNG VỚI THÊM #}
+<div class="modal fade" id="customModalEdit" tabindex="-1" role="dialog" aria-labelledby="customModalEditLabel">
+  <div class="modal-dialog " role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="customModalEditLabel">CẬP NHẬT MỐI ĐE DỌA</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span>&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="ioc-form-edit">
+          <input type="hidden" id="ioc-id-hidden">
+
+          <div class="form-row">
+            <div class="form-group col-md-12">
+              <label for="url-input-edit" class="col-form-label">C&C</label>
+              <input type="text" class="form-control" id="url-input-edit">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label for="description-input-edit" class="col-form-label">Mô tả</label>
+              <input type="text" class="form-control" id="description-input-edit">
+            </div>
+            <div class="form-group col-md-6">
+              <label for="status-select-edit" class="col-form-label">Trạng thái</label>
+              <select class="form-control" id="status-select-edit">
+                <option value="online">Online</option>
+                <option value="offline">Offline</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label for="threat-select-edit" class="col-form-label">Loại</label>
+              <select class="form-control" id="threat-select-edit">
+                <option value="malware_download">Malware Download</option>
+              </select>
+            </div>
+            <div class="form-group col-md-6">
+              <label for="pattern-input-edit" class="col-form-label">URL file mã độc</label>
+              <input type="text" class="form-control" id="pattern-input-edit">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label for="valid-from-edit" class="col-form-label">Hoạt động từ</label>
+              <input type="date" class="form-control" id="valid-from-edit">
+            </div>
+            <div class="form-group col-md-6">
+              <label for="valid-until-edit" class="col-form-label">Dừng hoạt động</label>
+              <input type="date" class="form-control" id="valid-until-edit">
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+        <button type="button" id="update_ioc_button" class="btn btn-success">
+          Cập nhật
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 {% endblock modals %}
+
+
 
 <!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
 
-
+  <script>
+    // URL cập nhật IOC cho modal SỬA
+    window.UPDATE_IOC_URL = "{{ url_for('update_ioc') }}";
+  </script>
 
 
 {% endblock javascripts %}

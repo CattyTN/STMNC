@@ -1470,3 +1470,122 @@ function toggleIOC(btn) {
     });
 }
 
+// XỬ LÝ MODAL THÊM / SỬA IOC
+
+$(function () {
+
+  // ----- MỞ MODAL THÊM MỚI: reset form -----
+  $('#open_add_ioc_modal').on('click', function () {
+    $('#customModalLabel').text('THÊM MỚI MỐI ĐE DỌA');
+
+    $('#url-input-add').val('');
+    $('#description-input-add').val('');
+    $('#status-select-add').val('online');
+    $('#threat-select-add').val('malware_download');
+    $('#pattern-input-add').val('');
+    $('#valid-from-add').val('');
+    $('#valid-until-add').val('');
+  });
+
+  // ----- MỞ MODAL SỬA: đổ dữ liệu vào form EDIT -----
+  $(document).on('click', '.edit-ioc', function (e) {
+    e.preventDefault();
+
+    var btn = $(this);
+
+    var iocId       = btn.data('ioc-id');
+    var url         = btn.data('url') || '';
+    var description = btn.data('description') || '';
+    var status      = btn.data('status') || 'online';
+    var threat      = btn.data('threat') || 'malware_download';
+    var pattern     = btn.data('pattern') || '';
+    var validFrom   = btn.data('valid-from') || '';
+    var validUntil  = btn.data('valid-until') || '';
+
+    $('#ioc-id-hidden').val(iocId);
+    $('#url-input-edit').val(url);
+    $('#description-input-edit').val(description);
+    $('#status-select-edit').val(status);
+    $('#threat-select-edit').val(threat);
+    $('#pattern-input-edit').val(pattern);
+    $('#valid-from-edit').val(validFrom);
+    $('#valid-until-edit').val(validUntil);
+  });
+
+  // ----- NÚT CẬP NHẬT TRONG MODAL EDIT -----
+  $('#update_ioc_button').on('click', function () {
+    var iocId = $('#ioc-id-hidden').val();
+    if (!iocId) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Lỗi',
+        text: 'Không xác định được IOC cần cập nhật.'
+      });
+      return;
+    }
+
+    var payload = {
+      id: iocId,
+      url: $('#url-input-edit').val(),
+      description: $('#description-input-edit').val(),
+      status: $('#status-select-edit').val(),
+      threat: $('#threat-select-edit').val(),
+      pattern: $('#pattern-input-edit').val(),
+      valid_from: $('#valid-from-edit').val(),
+      valid_until: $('#valid-until-edit').val()
+    };
+
+    var updateUrl = window.UPDATE_IOC_URL || '/update_ioc';
+
+    $.ajax({
+      url: updateUrl,
+      type: 'POST',
+      contentType: 'application/json; charset=utf-8',
+      data: JSON.stringify(payload),
+      success: function (resp) {
+        if (resp.success) {
+          // CẬP NHẬT HÀNG TRONG BẢNG
+          var row = $('a.edit-ioc[data-ioc-id="' + iocId + '"]').closest('tr');
+
+          // CỘT 0: IOC (url)
+          row.find('td').eq(0).text(payload.url);
+          // CỘT 2: LOẠI MỐI ĐE DỌA (threat)
+          row.find('td').eq(2).text(payload.threat);
+
+          // Cập nhật lại data-* trên nút edit cho lần sửa sau
+          var editLink = $('a.edit-ioc[data-ioc-id="' + iocId + '"]');
+          editLink.data('url', payload.url);
+          editLink.data('description', payload.description);
+          editLink.data('status', payload.status);
+          editLink.data('threat', payload.threat);
+          editLink.data('pattern', payload.pattern);
+          editLink.data('valid-from', payload.valid_from);
+          editLink.data('valid-until', payload.valid_until);
+
+          Swal.fire({
+            icon: 'success',
+            title: 'Đã cập nhật IOC thành công',
+            showConfirmButton: false,
+            timer: 1500
+          });
+
+          $('#customModalEdit').modal('hide');
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Lỗi',
+            text: resp.message || 'Không cập nhật được IOC.'
+          });
+        }
+      },
+      error: function () {
+        Swal.fire({
+          icon: 'error',
+          title: 'Lỗi',
+          text: 'Đã xảy ra lỗi khi cập nhật IOC.'
+        });
+      }
+    });
+  });
+
+});

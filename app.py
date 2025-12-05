@@ -414,7 +414,34 @@ def update_ioc_status():
 
     return jsonify({"success": result.matched_count == 1})
 
+@app.route('/update_ioc', methods=['POST'])
+@login_required
+@admin_required
+def update_ioc():
+    data = request.get_json(force=True) or {}
+    ioc_id = data.get('id')
 
+    if not ioc_id:
+        return jsonify({'success': False, 'message': 'Thiếu id IOC'}), 400
+
+    update_fields = {
+        'url':        (data.get('url') or '').strip(),
+        'description': (data.get('description') or '').strip(),
+        'status':     (data.get('status') or '').strip(),
+        'threat':     (data.get('threat') or '').strip(),
+        'pattern':    (data.get('pattern') or '').strip(),
+        'valid_from': data.get('valid_from') or None,
+        'valid_until': data.get('valid_until') or None,
+    }
+
+    update_doc = {k: v for k, v in update_fields.items() if v is not None}
+
+    result = indicator_collection.update_one({'id': ioc_id}, {'$set': update_doc})
+
+    if result.matched_count == 0:
+        return jsonify({'success': False, 'message': 'Không tìm thấy IOC với id này'}), 404
+
+    return jsonify({'success': True}), 200
 
 def relabel_all_search_and_backup(ioc_url):
     """
