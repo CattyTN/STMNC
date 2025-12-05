@@ -768,7 +768,7 @@ window.addEventListener('load', function(){
 })
 
 function click_pagination_1(){
-    let pageLinks = document.querySelectorAll(".page-link");
+    let pageLinks = document.querySelectorAll(".page-link.ioc");
 
         pageLinks.forEach(link => {
             link.addEventListener("click", function(event) {
@@ -997,9 +997,7 @@ function delete_user() {
 
 
 // Thanh phân trang cho trang quản lý người dùng
-window.addEventListener('load', function(){
-    click_pagination_user_managerment()
-})
+
 
 function click_pagination_user_managerment(){
     let pageLinks = document.querySelectorAll(".page-link.user_managerment");
@@ -1012,7 +1010,9 @@ function click_pagination_user_managerment(){
             });
         });
 }
-
+window.addEventListener('load', function(){
+    click_pagination_user_managerment()
+})
 // Thanh phân trang cho trang quản lý người dùng
 window.addEventListener('load', function(){
     click_pagination_search_and_backup()
@@ -1203,7 +1203,7 @@ function search_button() {
     }
   }
 
-function click_pagination_user_managerment(){
+function click_pagination_login_event(){
     let pageLinks = document.querySelectorAll(".page-link.login-log");
 
         pageLinks.forEach(link => {
@@ -1214,7 +1214,9 @@ function click_pagination_user_managerment(){
             });
         });
 }
-
+window.addEventListener('load', function(){
+    click_pagination_login_event()
+})
 // Thanh phân trang cho trang quản lý người dùng
 window.addEventListener('load', function(){
     click_pagination_search_and_backup()

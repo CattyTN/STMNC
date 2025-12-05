@@ -138,6 +138,7 @@ def get_login_event():
 def get_indicator():
     indicator = list(indicator_collection.find())
     df = pd.DataFrame(indicator)
+    print(df)
     if "_id" in df.columns:
         df.drop(columns=["_id"], inplace=True)
     return df

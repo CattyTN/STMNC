@@ -41,8 +41,8 @@ def create_password(plain_text):
     return hashed_password.decode('utf-8')
 
 
-delete_collection('login_event')
-create_collection('login_event.xlsx', 'login_event')
+delete_collection('user')
+create_collection('user.xlsx', 'user')
 
 
 def convert_password(plain_text):
