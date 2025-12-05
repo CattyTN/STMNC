@@ -1145,6 +1145,8 @@ def login_event():
     logs = logs.fillna("N/A").replace("", "N/A")
 
     total_pages = (len(logs) + 9) // 7   # giữ cách tính như ioc
+    print("------------------------")
+    print(total_pages)
     first_page_data = logs.iloc[:7]
     m = 7
     current_user_role = get_user_role()
@@ -1169,6 +1171,8 @@ def login_event_page():
     logs = logs.fillna("N/A").replace("", "N/A")
 
     total_pages = (len(logs) + 9) // 7
+    print("------------------------")
+    print(total_pages)
     start = (current_page - 1) * 7
     end = start + 7
     paginated_data = logs.iloc[start:end]
@@ -1655,7 +1659,12 @@ def login():
 @app.route('/logout', methods=['POST'])
 @login_required
 def logout():
+    username = current_user.id           # lấy username đang đăng nhập
+    log_login_event(username, "logout")  # ghi log logout
+
+    session.clear()
     logout_user()
+
     return jsonify({'status': 'success', 'message': 'Đăng xuất thành công'})
 
 @app.route('/protected')
