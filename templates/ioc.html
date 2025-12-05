@@ -16,6 +16,17 @@ tbody td {
   font-size: 12px;
 }
 
+/* Tối hơn nền để nổi bật các khối card */
+.content {
+    background-color: #e8e8e8 !important;
+}
+
+/* Thêm bóng đổ cho card */
+.card {
+    border: none !important;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.2) !important;
+}
+
 .modal.show .modal-dialog{
   margin-top: 0 !important;
   margin-bottom: 0 !important;
@@ -49,6 +60,13 @@ html, body {
   height: calc(100vh - 220px);
   overflow-y: auto;
   padding-bottom: 0;
+}
+table thead th,
+table tbody td {
+  color: black !important;
+}
+.text-primary {
+  color: black !important;
 }
 
 /* Nút giám sát (giữ nguyên nếu vẫn dùng) */
