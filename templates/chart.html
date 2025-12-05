@@ -43,62 +43,71 @@ html, body {
     var nodes = JSON.parse(`{{ nodes | tojson | safe }}`);
 
     Highcharts.chart("container", {
-      chart: {
-        type: "networkgraph",
-        marginTop: 80
-      },
+  chart: {
+    type: "networkgraph",
+    marginTop: 80
+  },
 
-      title: {
-        text: "BIỂU ĐỒ KẾT NỐI GIỮA MÁY TÍNH NỘI BỘ VÀ IOCs"
-      },
+  title: {
+    text: "BIỂU ĐỒ KẾT NỐI GIỮA MÁY TÍNH NỘI BỘ VÀ IOCs",
+    style: {
+      fontSize: "26px",     // Tăng size tiêu đề
+      fontWeight: "bold"
+    }
+  },
 
-      tooltip: {
-        formatter: function () {
-          const color = this.point.marker?.fillColor;
-          let info = "";
+  tooltip: {
+    style: {
+      fontSize: "16px"      // Tăng size chữ tooltip
+    },
+    formatter: function () {
+      const color = this.point.marker?.fillColor;
+      let info = "";
 
-          switch (color) {
-            case internalNodeColor:
-              info = "<b>Máy nội bộ</b>";
-              break;
-            case externalNodeColor:
-              info = "<b>Địa chỉ IOC độc hại</b>";
-              break;
-            default:
-              info = "Không xác định";
-          }
+      switch (color) {
+        case internalNodeColor:
+          info = "<b>Máy nội bộ</b>";
+          break;
+        case externalNodeColor:
+          info = "<b>Địa chỉ IOC độc hại</b>";
+          break;
+        default:
+          info = "Không xác định";
+      }
 
-          return "<b>" + this.key + "</b>: " + info;
-        }
-      },
+      return "<b>" + this.key + "</b>: " + info;
+    }
+  },
 
-      plotOptions: {
-        networkgraph: {
-          keys: ["from", "to"],
-          layoutAlgorithm: {
-            enableSimulation: true,
-            integration: "verlet",
-            linkLength: 100
-          }
-        }
-      },
+  plotOptions: {
+    networkgraph: {
+      keys: ["from", "to"],
+      layoutAlgorithm: {
+        enableSimulation: true,
+        integration: "verlet",
+        linkLength: 100
+      }
+    }
+  },
 
-      series: [{
-        marker: {
-          radius: 13
-        },
-        dataLabels: {
-          enabled: true,
-          linkFormat: "",
-          allowOverlap: true,
-          style: {
-            textOutline: false
-          }
-        },
-        data: data,
-        nodes: nodes
-      }]
-    });
+  series: [{
+    marker: {
+      radius: 15  // tăng bán kính node nếu muốn
+    },
+    dataLabels: {
+      enabled: true,
+      linkFormat: "",
+      allowOverlap: true,
+      style: {
+        textOutline: false,
+        fontSize: "18px",    // Tăng size label của node
+        fontWeight: "bold"
+      }
+    },
+    data: data,
+    nodes: nodes
+  }]
+});
   </script>
 
 
