@@ -602,6 +602,32 @@ def delete_user():
     result = user_collection.delete_one({"username": data["username"]})
     return jsonify({"success": True, "message": "Thêm mới mối đe dọa thành công!"})
 
+
+@app.route('/update_user', methods=['POST'])
+@login_required
+@admin_required
+def update_user():
+    data = request.get_json() or {}
+    username = data.get("username", "").strip()
+    unit = data.get("unit", "").strip()
+    role = data.get("role", "").strip()
+
+    if not username or not unit or not role:
+        return jsonify({"success": False, "message": "Các trường không được để trống!"})
+
+    result = user_collection.update_one(
+        {"username": username},
+        {"$set": {
+            "unit_name": unit,
+            "role": role
+        }}
+    )
+
+    if result.matched_count == 0:
+        return jsonify({"success": False, "message": "Không tìm thấy người dùng!"})
+
+    return jsonify({"success": True, "message": "Cập nhật người dùng thành công!"})
+
 @app.route('/index', methods=['GET', 'POST'])
 @login_required
 def index():

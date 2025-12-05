@@ -63,7 +63,8 @@ tbody td {
                     <th scope="col" class="sort col-4">Đơn vị</th>
                     <th scope="col" class="sort col-3">Ngày tạo</th>
                     <th scope="col" class="sort col-2">Quyền</th>
-                    <th scope="col" class="sort col-2">Thao tác</th>
+                    <th scope="col" class="sort col-1">Sửa</th>
+                    <th scope="col" class="sort col-1">Xóa</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -74,6 +75,7 @@ tbody td {
                     <th scope="col" class="sort">sdfdsfdsfds</th>
                     <th scope="col" class="sort">sdfsdf</th>
                     <th scope="col" class="sort">sdfsdfsdfsdfsd</th>
+                    <th scope="col" class="sort">sdfsdfsdfsdfsd</th>
                   </tr>
                   {%else%}
                   {% for index, row in records.iterrows() %}
@@ -81,8 +83,23 @@ tbody td {
                     <td scope="col" class="sort col-2" style="font-size: 12px;">{{ row['username'] }}</td>
                     <td scope="col" class="sort col-2" style="font-size: 12px;">{{ row['unit_name'] }}</td>
                     <td scope="col" class="sort col-2" style="font-size: 12px;">{{ row['create_time'] }}</td>
-                    <td scope="col" class="sort col-3" style="font-size: 12px;">{{ row['role'] }}</td>
-                    <td scope="col" class="sort col-3" style="font-size: 12px;"><a href="#"><i class="tim-icons icon-trash-simple" id="{{row['username']}}"></i></a></td>
+                    <td scope="col" class="sort col-2" style="font-size: 12px;">{{ row['role'] }}</td>
+
+                    <!-- Cột Edit -->
+                    <td scope="col" class="sort col-1" style="font-size: 12px;">
+                      <a href="#"
+                        class="edit-user"
+                        data-username="{{ row['username'] }}"
+                        data-unit="{{ row['unit_name'] }}"
+                        data-role="{{ row['role'] }}">
+                        <i class="tim-icons icon-pencil"></i>
+                      </a>
+                    </td>
+
+                    <!-- Cột Xóa -->
+                    <td scope="col" class="sort col-1" style="font-size: 12px;">
+                      <a href="#"><i class="tim-icons icon-trash-simple" id="{{row['username']}}"></i></a>
+                    </td>
                   </tr>
                   {% endfor %}
                   {%endif%}
@@ -200,6 +217,41 @@ tbody td {
       </div>
     </div>
   </div>
+<!-- Modal SỬA NGƯỜI DÙNG -->
+<div class="modal fade" id="editUserModal" tabindex="-1" role="dialog" aria-labelledby="editUserLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editUserLabel">SỬA NGƯỜI DÙNG</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span>&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <!-- Ẩn username để gửi lên backend -->
+          <input type="hidden" id="edit-username-hidden">
+
+          <div class="form-group">
+            <label class="col-form-label">Đơn vị</label>
+            <input type="text" class="form-control" id="edit-unit-input">
+          </div>
+          <div class="form-group">
+            <label class="col-form-label">Quyền</label>
+            <select class="form-control" id="edit-role-select">
+              <option value="admin">Admin</option>
+              <option value="user">User</option>
+            </select>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+        <button type="button" id="update_user_button" class="btn btn-primary">Cập nhật</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 {% endblock modals %}
 <!-- Specific Page JS goes HERE  -->

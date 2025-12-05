@@ -1285,3 +1285,91 @@ function change_password_listener() {
         });
     });
 }
+
+
+// Sửa người dùng
+window.addEventListener('load', function(){
+    edit_user();
+});
+
+function edit_user() {
+    // Bắt click vào icon edit
+    var editButtons = document.querySelectorAll(".edit-user");
+    if (editButtons.length === 0) return;
+
+    editButtons.forEach(function(btn) {
+        btn.addEventListener("click", function (e) {
+            e.preventDefault();
+            var username = this.dataset.username;
+            var unit = this.dataset.unit || "";
+            var role = this.dataset.role || "user";
+
+            // Đổ dữ liệu vào modal
+            document.getElementById("edit-username-hidden").value = username;
+            document.getElementById("edit-unit-input").value = unit;
+            document.getElementById("edit-role-select").value = role;
+
+            // Mở modal
+            $('#editUserModal').modal('show');
+        });
+    });
+
+    // Bắt click nút cập nhật
+    var updateBtn = document.getElementById("update_user_button");
+    if (!updateBtn) return;
+
+    updateBtn.addEventListener("click", function () {
+        var username = document.getElementById("edit-username-hidden").value.trim();
+        var unit = document.getElementById("edit-unit-input").value.trim();
+        var role = document.getElementById("edit-role-select").value;
+
+        if (!username || !unit || !role) {
+            Swal.fire({
+                title: "Thiếu dữ liệu!",
+                text: "Đơn vị và quyền không được để trống.",
+                icon: "warning"
+            });
+            return;
+        }
+
+        var formData = {
+            username: username,
+            unit: unit,
+            role: role
+        };
+
+        fetch("/update_user", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire({
+                    title: "Thành công!",
+                    text: data.message || "Đã cập nhật người dùng.",
+                    icon: "success"
+                }).then(() => {
+                    location.reload();
+                });
+            } else {
+                Swal.fire({
+                    title: "Lỗi!",
+                    text: data.message || "Không thể cập nhật người dùng.",
+                    icon: "error"
+                });
+            }
+        })
+        .catch(error => {
+            console.error("Lỗi gửi dữ liệu:", error);
+            Swal.fire({
+                title: "Lỗi!",
+                text: "Không thể kết nối đến server.",
+                icon: "error"
+            });
+        });
+    });
+}
