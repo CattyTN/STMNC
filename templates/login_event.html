@@ -1,0 +1,134 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Log đăng nhập {% endblock %}
+
+{% block stylesheets %}
+<style>
+table {
+  table-layout: fixed;
+  width: 100%;
+}
+thead th,
+tbody td {
+  text-align: center !important;
+  vertical-align: middle;
+  font-size: 12px;
+}
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+.content, .row, .col-md-12, .card {
+  height: 100%;
+}
+.card-body {
+  height: calc(100vh - 220px);
+  overflow-y: auto;
+  padding-bottom: 0;
+}
+</style>
+{% endblock stylesheets %}
+
+{% block content %}
+
+<div class="content">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card">
+        
+        <!-- TIÊU ĐỀ -->
+        <div class="card-header d-flex align-items-center justify-content-between">
+          <h4 class="card-title"><strong>LOG ĐĂNG NHẬP HỆ THỐNG</strong></h4>
+
+
+        </div>
+
+        <!-- BẢNG LOG -->
+        <div class="card-body">
+          <div class="table-responsive ps">
+            <table class="table tablesorter">
+              <thead class="text-primary">
+                <tr>
+                  <th scope="col" class="col-2">TÀI KHOẢN</th>
+                  <th scope="col" class="col-2">IP ĐĂNG NHẬP</th>
+                  <th scope="col" class="col-2">THỜI GIAN</th>
+                  <th scope="col" class="col-3">TRẠNG THÁI</th>
+                  <th scope="col" class="col-3">USER AGENT</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {% if a == 0 %}
+                <tr>
+                  <td>demo_user</td>
+                  <td>192.168.1.10</td>
+                  <td>2025-12-04 10:20:11</td>
+                  <td>success</td>
+                  <td>Mozilla/5.0</td>
+                </tr>
+                {% else %}
+                {% for index, row in records.iterrows() %}
+                <tr>
+                  <td>{{ row['username'] }}</td>
+                  <td>{{ row['ip'] }}</td>
+                  <td>{{ row['login_time'] }}</td>
+                  <td>{{ row['status'] }}</td>
+                  <td>{{ row['user_agent'] }}</td>
+                </tr>
+                {% endfor %}
+                {% endif %}
+              </tbody>
+
+            </table>
+          </div>
+        </div>
+
+        <!-- PHÂN TRANG (GIỮ NGUYÊN) -->
+        <div class="card-footer py-4">
+          <nav aria-label="...">
+            <ul class="pagination justify-content-end mb-0">
+              <li class="page-item disabled">
+                <a class="page-link nhat" href="#" tabindex="-1">
+                  <i class="fa-solid fa-chevron-left"></i>
+                </a>
+              </li>
+
+              {% if current_page == 1 %}
+                <li class="page-item active"><a class="page-link login-log" style="color:black;">1</a></li>
+                {% if total_pages > 1 %}
+                <li class="page-item"><a class="page-link login-log" style="color:black;" id="page_2">2</a></li>
+                {% if total_pages > 3 %}
+                <li class="page-item disabled"><a class="page-link login-log">...</a></li>
+                {% endif %}
+                <li class="page-item"><a class="page-link login-log" id="page_{{ total_pages }}">{{ total_pages }}</a></li>
+                {% endif %}
+              {% elif current_page == 2 %}
+                <li class="page-item"><a class="page-link login-log" id="page_1">1</a></li>
+                <li class="page-item active"><a class="page-link login-log">2</a></li>
+                {% if total_pages > 2 %}
+                <li class="page-item"><a class="page-link login-log" id="page_3">3</a></li>
+                {% endif %}
+                {% if total_pages > 4 %}
+                <li class="page-item disabled"><a class="page-link login-log">...</a></li>
+                {% endif %}
+                {% if total_pages > 3 %}
+                <li class="page-item"><a class="page-link login-log" id="page_{{ total_pages }}">{{ total_pages }}</a></li>
+                {% endif %}
+              {% endif %}
+
+              <li class="page-item disabled">
+                <a class="page-link login-log" href="#">
+                  <i class="fa-solid fa-chevron-right"></i>
+                </a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}

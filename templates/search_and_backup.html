@@ -1,0 +1,278 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Tables {% endblock %} 
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+<!--<link  href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.0/mdb.min.css"  rel="stylesheet"/>-->
+
+<style>
+table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+thead th,
+tbody td {
+  text-align: center !important; 
+  vertical-align: middle;        
+  font-size: 12px;
+}
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+.content, .row, .col-md-12, .card {
+  height: 100%;
+}
+.card-body {
+  height: calc(100vh - 220px); /* Điều chỉnh số px cho vừa header/footer */
+  overflow-y: auto;
+  padding-bottom: 0;
+}
+</style>
+
+{% endblock stylesheets %}
+
+{% block content %}
+
+  <div class="content">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card ">
+          <div class="card-header d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center"><h6 class="card-title"> <strong>TRUY XUẤT DỮ LIỆU</strong></h6></div>
+
+            <input type="text" class="form-control me-2" id="search_textbox" placeholder="Tìm kiếm" style=" width: 50%; ">
+            <button type="button"
+        class="btn btn-sm btn-default"
+        id="search_keyword_button">
+  Tìm kiếm
+</button>
+              
+              
+              <div>
+              <label class="btn btn-sm btn-default active" id="export_button">
+                <span class="d-none d-sm-block d-md-block d-lg-block d-xl-block" >Xuất</span>
+                  </label>
+              
+              <label class="btn btn-sm btn-default active" id="import_button">
+                <span class="d-none d-sm-block d-md-block d-lg-block d-xl-block">Nhập</span>
+                <input type="file" id="jsonFile" accept=".json" style="opacity:0;position:absolute;left:0;top:0;width:100%;height:100%;cursor:pointer;">
+              </label>
+
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive ps">
+              <table class="table tablesorter " id="">
+                <thead class="text-primary">
+                  <tr>
+                    <th scope="col" class="sort col-2">IP</th>
+                    <th scope="col" class="sort col-2">MAC</th>
+                    <th scope="col" class="sort col-2">THỜI GIAN</th>
+                    <th scope="col" class="sort col-3">ĐƠN VỊ</th>
+                    <th scope="col" class="sort col-3">HÀNH VI</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {%if a == 0%}
+                  <tr>
+                    <th scope="col" class="sort">192.168.100.130</th>
+                    <th scope="col" class="sort">SDDSADASDASD</th>
+                    <th scope="col" class="sort">sdfdsfdsfds</th>
+                    <th scope="col" class="sort">sdfsdf</th>
+                    <th scope="col" class="sort">sdfsdfsdfsdfsd</th>
+                  </tr>
+                  {%else%}
+                  {% for index, row in records.iterrows() %}
+                  {%if row['label'] == 1%}
+                  <tr>
+                    <td scope="col" class="sort col-2" style="font-size: 12px; background-color: #ff3232;"> {{ row['ip'] }}</td>
+                    <td scope="col" class="sort col-2" style="font-size: 12px; background-color: #ff3232;">{{ row['mac'] }}</td>
+                    <td scope="col" class="sort col-2" style="font-size: 12px; background-color: #ff3232;">{{ row['time_receive'] }}</td>
+                    <td scope="col" class="sort col-4" style="font-size: 12px; background-color: #ff3232;">{{ row['unit_full_name'] }}</td>
+                    <td scope="col" class="sort col-3" style="font-size: 12px; background-color: #ff3232; "><a href="{{ url_for('detail', ioc=row['extracted_ip'], mac=row['mac']) }}" style="color:#2e2434;">{{ row['description'] }} (MiAV)</a></td>
+                  </tr>
+                  {%else%}
+                  <tr>
+                    <td scope="col" class="sort col-2" style="font-size: 12px;">{{ row['ip'] }}</td>
+                    <td scope="col" class="sort col-2" style="font-size: 12px;">{{ row['mac'] }}</td>
+                    <td scope="col" class="sort col-2" style="font-size: 12px;">{{ row['time_receive'] }}</td>
+                    <td scope="col" class="sort col-3" style="font-size: 12px;">{{ row['unit_full_name'] }}</td>
+                    <td scope="col" class="sort col-3" style="font-size: 12px;"><a href="{{ url_for('detail', ioc=row['extracted_ip'], mac=row['mac']) }}" style="color:#2e2434;" >{{ row['description'] }}</a></td>
+                  </tr>
+                  {%endif%}
+                  {% endfor %}
+                  {%endif%}
+                </tbody>
+              </table>
+            </div>
+          </div>
+            <div class="card-footer py-4">
+              <nav aria-label="...">
+                <ul class="pagination justify-content-end mb-0">
+                  <li class="page-item disabled">
+                    <a class="page-link nhat" href="#" tabindex="-1">
+                      <i class="fa-solid fa-chevron-left"></i>
+                      <span class="sr-only">Previous</span>
+                    </a>
+                  </li>
+                  <ul class="pagination justify-content-end mb-0">
+                    {% if current_page == 1 %}
+                        <li class="page-item active"><a class="page-link search_and_backup" style="color:black;" href="#" id ="page_1">1</a></li>
+                        {% if total_pages > 1 %}<li class="page-item"><a class="page-link search_and_backup" style="color:black;" href="#" id ='page_2'>2</a></li>
+                        {% if total_pages > 3 %}<li class="page-item disabled"><a class="page-link search_and_backup" style="color:black;">...</a></li>{% endif %}
+                        <li class="page-item"><a class="page-link search_and_backup" style="color:black;" href="#" id="page_{{ total_pages }}">{{ total_pages }}</a></li>{% endif %}
+                
+                    {% elif current_page == 2 %}
+                        <li class="page-item"><a class="page-link search_and_backup" style="color:black;" href="#" id ='page_1'>1</a></li>
+                        <li class="page-item active"><a class="page-link search_and_backup" style="color:black;" href="#" id ='page_2'>2</a></li>
+                        {% if total_pages > 2 %}<li class="page-item"><a class="page-link search_and_backup" style="color:black;" href="#" id ='page_3'>3</a></li>{% endif %}
+                        {% if total_pages > 4 %}<li class="page-item disabled"><a class="page-link search_and_backup" style="color:black;">...</a></li>{% endif %}
+                        {% if total_pages > 3 %}<li class="page-item"><a class="page-link search_and_backup" style="color:black;" href="#" id="page_{{ total_pages }}">{{ total_pages }}</a></li>{% endif %}
+                
+                    {% elif current_page == 3 %}
+                        <li class="page-item"><a class="page-link search_and_backup" style="color:black;" href="#" id ='page_1'>1</a></li>
+                        <li class="page-item"><a class="page-link search_and_backup" style="color:black;" href="#" id ='page_2'>2</a></li>
+                        <li class="page-item active"><a class="page-link search_and_backup" style="color:black;" href="#" id ='page_3'>3</a></li>
+                        {% if total_pages > 3 %}<li class="page-item"><a class="page-link search_and_backup" style="color:black;" href="#" id ='page_4'>4</a></li>
+                        {% if total_pages > 5 %}<li class="page-item disabled"><a class="page-link search_and_backup" style="color:black;">...</a></li>{% endif %}
+                        <li class="page-item"><a class="page-link search_and_backup" style="color:black;" href="#" id="page_{{ total_pages }}">{{ total_pages }}</a></li>{% endif %}
+                
+                    {% elif ((current_page > 3) and (current_page < (total_pages - 1)))  %}
+                        <li class="page-item"><a class="page-link search_and_backup" style="color:black;" href="#" id ='page_1'>1</a></li>
+                        <li class="page-item disabled"><a class="page-link search_and_backup" style="color:black;">...</a></li>
+                        <li class="page-item"><a class="page-link search_and_backup" style="color:black;" href="#" id="page_{{ current_page - 1 }}">{{ current_page - 1 }}</a></li>
+                        <li class="page-item active"><a class="page-link search_and_backup" style="color:black;" href="#" id="page_{{ current_page }}">{{ current_page }}</a></li>
+                         <li class="page-item"><a class="page-link search_and_backup" style="color:black;" href="#" id="page_{{ current_page + 1 }}">{{ current_page + 1 }}</a></li>
+                        <li class="page-item disabled"><a class="page-link search_and_backup" style="color:black;">...</a></li>
+                        <li class="page-item"><a class="page-link search_and_backup" style="color:black;" href="#" id="page_{{ total_pages }}">{{ total_pages }}</a></li>
+                    {% elif (current_page == (total_pages - 1))  %}
+                        <li class="page-item"><a class="page-link search_and_backup" style="color:black;" href="#" id ='page_1'>1</a></li>
+                        <li class="page-item disabled"><a class="page-link search_and_backup" style="color:black;">...</a></li>
+                        <li class="page-item"><a class="page-link search_and_backup" style="color:black;" href="#" id="page_{{ current_page - 1 }}">{{ current_page - 1 }}</a></li>
+                        <li class="page-item active"><a class="page-link search_and_backup" style="color:black;" href="#" id="page_{{ current_page }}">{{ current_page }}</a></li>
+                        <li class="page-item"><a class="page-link search_and_backup" style="color:black;" href="#" id="page_{{ total_pages }}">{{ total_pages }}</a></li>
+                    {% elif current_page == total_pages   %}
+                        <li class="page-item"><a class="page-link search_and_backup" style="color:black;" href="#" id ='page_1'>1</a></li>
+                        <li class="page-item disabled"><a class="page-link search_and_backup" style="color:black;">...</a></li>
+                        <li class="page-item"><a class="page-link search_and_backup" style="color:black;" href="#" id="page_{{ current_page - 1 }}">{{ current_page - 1 }}</a></li>
+                        <li class="page-item active"><a class="page-link " style="color:black;" href="#" id="page_{{ total_pages }}">{{ total_pages }}</a></li>
+                    {% endif %}
+
+                </ul>
+                  <li class="page-item disabled">
+                    <a class="page-link nhat" href="#">
+                      <i class="fa-solid fa-chevron-right"></i>
+                      <span class="sr-only">Next</span>
+                    </a>
+                  </li>
+                </ul>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+<!-- để add bản ghi  -->
+<script>
+  $(document).ready(function() {
+      var socket = io.connect('http://' + document.domain + ':' + location.port);
+      socket.on('new_data', function(data) {
+        var tableBody = $('.list');
+        data = JSON.parse(data);
+        data.forEach(function(row) {
+              var newRow = `
+                    <tr>
+                    <th scope="col" class="sort col-2">${ row['IP'] }</th>
+                    <th scope="col" class="sort col-2">${ row['MAC'] }</th>
+                    <th scope="col" class="sort col-2">${ row['TIME_RECEIVE'] }</th>
+                    <th scope="col" class="sort col-3">${ row['UNIT_FULL_NAME'] }</th>
+                    <th scope="col" class="sort col-3">${ row['DESCRIPTION'] }</th>
+                  </tr>`;
+                if (row.label == 1){
+                  newRow = `
+                    <tr>
+                    <th scope="col" class="sort col-2">${ row['IP'] }</th>
+                    <th scope="col" class="sort col-2">${ row['MAC'] }</th>
+                    <th scope="col" class="sort col-2">${ row['TIME_RECEIVE'] }</th>
+                    <th scope="col" class="sort col-3">${ row['UNIT_FULL_NAME'] }</th>
+                    <th scope="col" class="sort col-3">${ row['DESCRIPTION'] } (MiAV)</th>
+                  </tr>`;
+          }
+              tableBody.append(newRow);
+          });
+      });
+  });
+</script>
+
+<!-- để phân trang  -->
+
+<!--
+<script>
+  async function import_file() {
+    const fileInput = document.getElementById('jsonFile');
+    const file = fileInput.files[0];
+
+    if (!file) {
+      alert("Vui lòng chọn file JSON!");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const response = await fetch('/import_file', {
+        method: 'POST',
+        body: formData
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        alert(`❌ Lỗi: ${result.error}`);
+      } else {
+        alert(`✅ Thành công: Đã kiểm tra ${result.count} bản ghi.`);
+      }
+    } catch (error) {
+      alert(`❌ Lỗi kết nối: ${error.message}`);
+    }
+
+    // Reset input để người dùng có thể chọn lại
+    fileInput.value = '';
+  }
+</script>
+-->
+<script>
+  async function sendSearch() {
+    const keyword = document.getElementById("search_textbox").value;
+    try {
+      const response = await fetch('/search_keyword', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ keyword: keyword })
+      });
+
+      const result = await response.json();
+      alert("Flask nhận: " + result.message);
+    } catch (err) {
+      alert("Lỗi khi gửi: " + err.message);
+    }
+  }
+</script>
+
+{% endblock javascripts %}

@@ -1,0 +1,317 @@
+<style>
+
+  /* Sidebar Scrollable - Override existing styles */
+  .sidebar,
+  .off-canvas-sidebar {
+    height: calc(100vh - 80px) !important;
+    margin-top: 80px !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .sidebar-wrapper {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    max-height: none !important;
+    overflow: visible !important;
+    flex: 1 !important;
+  }
+
+  .sidebar-wrapper .logo {
+    flex-shrink: 0;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e3e3e3;
+  }
+
+  .sidebar-wrapper .nav {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding-top: 15px;
+    min-height: 0;
+  }
+
+  /* Scrollbar styling (optional) */
+  .sidebar-wrapper .nav::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .sidebar-wrapper .nav::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .sidebar-wrapper .nav::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 3px;
+  }
+
+  .sidebar-wrapper .nav::-webkit-scrollbar-thumb:hover {
+    background: #999;
+  }
+
+    .export-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+  }
+
+  .export-modal.show {
+    display: flex;
+  }
+
+  .export-modal-dialog {
+    background: #fff;
+    border-radius: 8px;
+    max-width: 480px;
+    width: 100%;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  }
+
+  .export-modal-header,
+  .export-modal-footer {
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .export-modal-body {
+    padding: 16px;
+  }
+
+  .export-close {
+    border: none;
+    background: transparent;
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .export-modal .form-group {
+    margin-bottom: 12px;
+  }
+
+  /* input trong modal có picker -> trông giống giám sát */
+  .export-modal .form-control {
+    cursor: pointer;
+    background-color: #fff;
+  }
+
+  /* đảm bảo widget datetime nổi trên modal */
+  .tempus-dominus-widget {
+    z-index: 3001 !important;
+  }
+</style>
+    <div class="sidebar">
+        <!--
+          Tip 1: You can change the color of the sidebar using: data-color="blue | green | orange | red"
+      -->
+        <div class="sidebar-wrapper" >
+            <div class="logo">
+                <a href="#" class="simple-text logo-mini" style="color: black;">
+                    HT
+                </a>
+                <a href="#" class="simple-text logo-normal" style="color: black;">
+                    SĂN TÌM MỐI NGUY CƠ
+                </a>
+            </div>
+            <ul class="nav">
+                <li class="{% if 'index' in segment %} active {% endif %} ">
+                    <a href="/index">
+                        <i class="tim-icons icon-chart-pie-36" style="color: black;"></i>
+                        <p  style="color: black;"><strong>Trang chủ</strong></p>
+                    </a>
+                </li>
+                <li class="{% if 'user' in segment %} active {% endif %}">
+                    <a href="/ioc">
+                        <i class="tim-icons icon-align-center" style="color: black;"></i>
+                        <p  style="color: black;"><strong>cơ sở dữ liệu</strong></p>
+                    </a>
+                </li>
+                <li class="{% if 'tables' in segment %} active {% endif %}">
+                    <a href="/monitor">
+                        <i class="tim-icons icon-puzzle-10" style="color: black;"></i>
+                        <p  style="color: black;"><strong>Giám sát</strong></p>
+                    </a>
+                </li>
+                {% if current_user_role == 'admin' %}
+                <li class="{% if 'tables' in segment %} active {% endif %}" >
+                    <a href="/user_managerment">
+                        <i class="tim-icons icon-single-02" style="color: black;"></i>
+                        <p  style="color: black;"><strong>Quản lý người dùng</strong></p>
+                    </a>
+                </li>
+                {%endif%}
+                {% if current_user_role == 'admin' %}
+                <li class="{% if 'tables' in segment %} active {% endif %}" >
+                    <a href="/login_event">
+                        <i class="tim-icons icon-single-02" style="color: black;"></i>
+                        <p  style="color: black;"><strong>Log đăng nhập</strong></p>
+                    </a>
+                </li>
+                {%endif%}
+                <li class="{% if 'tables' in segment %} active {% endif %}" >
+                    <a href="/chart">
+                        <i class="tim-icons icon-single-02" style="color: black;"></i>
+                        <p  style="color: black;"><strong>Trực quan hóa</strong></p>
+                    </a>
+                </li>
+                <li class="{% if 'tables' in segment %} active {% endif %}" >
+                    <a href="/search_and_backup">
+                        <i class="tim-icons icon-zoom-split" style="color: black;"></i>
+                        <p  style="color: black;"><strong>Tìm kiếm và sao lưu</strong></p>
+                    </a>
+                </li>
+                <li class="{% if 'tables' in segment %} active {% endif %}" >
+                    <a href="#"   id="export_report_link"   data-toggle="modal"   data-target="#exportReportModal">
+
+                        <i class="tim-icons icon-paper" style="color: black;"></i>
+                        <p  style="color: black;"><strong>Xuất báo cáo</strong></p>
+                    </a>
+                </li>
+                <li>
+                    <a href="/">
+                        <i class="tim-icons icon-button-power" style="color: black;"></i>
+                        <p class="fw-bold" style="color: black;"><strong>Đăng xuất</strong></p>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+<!-- MODAL XUẤT BÁO CÁO MỚI -->
+<div id="exportModal" class="export-modal">
+  <div class="export-modal-dialog">
+    <div class="export-modal-header">
+      <h5>Xuất báo cáo</h5>
+      <button type="button" id="export_close" class="export-close">&times;</button>
+    </div>
+    <div class="export-modal-body">
+      <div class="form-group">
+        <label for="export_from">Từ ngày</label>
+        <!-- dùng input text để gắn Tempus Dominus (giống GIÁM SÁT) -->
+        <input type="text" id="export_from" class="form-control" placeholder="YYYY-MM-DD HH:MM:SS">
+      </div>
+      <div class="form-group">
+        <label for="export_to">Đến ngày</label>
+        <input type="text" id="export_to" class="form-control" placeholder="YYYY-MM-DD HH:MM:SS">
+      </div>
+    </div>
+    <div class="export-modal-footer">
+      <button type="button" class="btn btn-secondary" id="export_cancel">Hủy</button>
+      <button type="button" class="btn btn-primary" id="export_confirm">Xuất</button>
+    </div>
+  </div>
+</div>
+
+<!-- form ẩn gửi về backend -->
+<form id="export_form" method="POST" action="/export_report" target="_blank">
+  <input type="hidden" name="from" id="export_form_from">
+  <input type="hidden" name="to"   id="export_form_to">
+</form>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const openLink   = document.getElementById('export_report_link');
+    const modal      = document.getElementById('exportModal');
+    const btnClose   = document.getElementById('export_close');
+    const btnCancel  = document.getElementById('export_cancel');
+    const btnConfirm = document.getElementById('export_confirm');
+    const inputFrom  = document.getElementById('export_from');
+    const inputTo    = document.getElementById('export_to');
+
+    const form       = document.getElementById('export_form');
+    const formFrom   = document.getElementById('export_form_from');
+    const formTo     = document.getElementById('export_form_to');
+
+    if (!openLink || !modal) return;
+
+    function openModal()  { modal.classList.add('show'); }
+    function closeModal() { modal.classList.remove('show'); }
+
+    openLink.addEventListener('click', function (e) {
+        e.preventDefault();
+        openModal();
+    });
+
+    btnClose.addEventListener('click', closeModal);
+    btnCancel.addEventListener('click', closeModal);
+
+    modal.addEventListener('click', function (e) {
+        if (e.target === modal) closeModal();
+    });
+
+    // Gắn Tempus Dominus giống GIÁM SÁT
+    const picker_export_from = new tempusDominus.TempusDominus(
+        document.getElementById('export_from'),
+        {
+            display: {
+                components: {
+                    calendar: true,
+                    date: true,
+                    month: true,
+                    year: true,
+                    decades: true,
+                    clock: true,
+                    hours: true,
+                    minutes: true,
+                    seconds: true
+                }
+            },
+            localization: {
+                format: 'yyyy-MM-dd HH:mm:ss',
+                hourCycle: 'h23'
+            }
+        }
+    );
+
+    const picker_export_to = new tempusDominus.TempusDominus(
+        document.getElementById('export_to'),
+        {
+            display: {
+                components: {
+                    calendar: true,
+                    date: true,
+                    month: true,
+                    year: true,
+                    decades: true,
+                    clock: true,
+                    hours: true,
+                    minutes: true,
+                    seconds: true
+                }
+            },
+            localization: {
+                format: 'yyyy-MM-dd HH:mm:ss',
+                hourCycle: 'h23'
+            }
+        }
+    );
+
+    btnConfirm.addEventListener('click', function () {
+        const from = (inputFrom.value || '').trim();
+        const to   = (inputTo.value || '').trim();
+
+        if (!from || !to) {
+            alert("Vui lòng điền đầy đủ Từ ngày và Đến ngày!");
+            return;
+        }
+
+        // gửi thẳng format yyyy-MM-dd HH:mm:ss cho backend
+        formFrom.value = from;
+        formTo.value   = to;
+
+        form.submit();
+        closeModal();
+    });
+});
+</script>
+
+
+
+

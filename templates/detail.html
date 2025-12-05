@@ -1,0 +1,132 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} TRANG CHỦ {% endblock %} 
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+    <div class="content">
+        <div class="row">
+            <div class="col-lg-4">
+                <div class="card card-chart" style="height:100px">
+                    <div class="card-header">
+                        <h4 class="card-category"><strong>1. ĐỊA CHỈ IP</strong></h4>
+                        <h4 class="card-title"><i class="tim-icons icon-minimal-down text-primary"></i>{{df.loc[0,'source_ip']}} </h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card card-chart" style="height:100px">
+                    <div class="card-header">
+                        <h5 class="card-category"><strong>2. ĐỊA CHỈ MAC</strong></h5>
+                        <h4 class="card-title"><i class="tim-icons icon-tablet-2 text-info"></i>{{df.loc[0,'source_mac']}} </h4>
+                    </div>
+
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card card-chart" style="height:100px">
+                    <div class="card-header">
+                        <h5 class="card-category"><strong>3. ĐƠN VỊ</strong></h5>
+                        <h4 class="card-title"><i class="tim-icons icon-square-pin text-success"></i>{{df.loc[0,'unit_name']}} </h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+          <div class="col-lg-4">
+              <div class="card card-chart" style="height:100px">
+                  <div class="card-header">
+                      <h5 class="card-category"><strong>4. KẾT NỐI ĐẾN IOC</strong></h5>
+                      <h4 class="card-title"><i class="tim-icons icon-double-right text-primary"></i> {{df.loc[0,'ioc_ip']}}</h4>
+                  </div>
+              </div>
+          </div>
+          <div class="col-lg-4">
+              <div class="card card-chart" style="height:100px">
+                  <div class="card-header">
+                      <h5 class="card-category"><strong>5. TRẠNG THÁI IOC</strong></h5>
+                      <h4 class="card-title"><i class="tim-icons icon-sound-wave text-info"></i>{{df.loc[0,'status']}}</h4>
+                  </div>
+
+              </div>
+          </div>
+          <div class="col-lg-4">
+              <div class="card card-chart" style="height:100px">
+                  <div class="card-header">
+                      <h5 class="card-category"><strong>6. HÀNH VI</strong></h5>
+                      <h4 class="card-title"><i class="tim-icons icon-tap-02 text-success"></i>{{df.loc[0,'threat']}}</h4>
+                  </div>
+              </div>
+          </div>
+      </div>
+      <div class="row">
+        <div class="col-lg-4">
+            <div class="card card-chart" style="height:100px">
+                <div class="card-header">
+                    <h5 class="card-category"><strong>7. TỔ CHỨC/NHÓM CÓ LIÊN QUAN</strong></h5>
+                    <h4 class="card-title"><i class="tim-icons icon-bank text-primary"></i>{{df.loc[0,'intrusion_name']}} </h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card card-chart" style="height:100px">
+                <div class="card-header">
+                    <h4 class="card-category"><strong>8. MÃ ĐỘC LIÊN QUAN</strong></h4>
+                    <h4 class="card-title"> <i class="tim-icons icon-attach-87 text-info"></i>{{df.loc[0,'malware_name']}}</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card card-chart" style="height:100px">
+                <div class="card-header">
+                    <h5 class="card-category"><strong>9. MÔ TẢ VỀ LOẠI MÃ ĐỘC</strong></h5>
+                    <h4 class="card-title"><i class="tim-icons icon-align-center text-info"></i> {{df.loc[0,'malware_description']}}</h4>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="row">
+      <div class="col-lg-4">
+          <div class="card card-chart" style="height:100px">
+              <div class="card-header">
+                  <h5 class="card-category"><strong>10. CHIẾN DỊCH LIÊN QUAN</strong></h5>
+                  <h3 class="card-title"><i class="tim-icons icon-bell-55 text-primary"></i></h3>
+              </div>
+          </div>
+      </div>
+      <div class="col-lg-4">
+          <div class="card card-chart" style="height:100px">
+              <div class="card-header">
+                  <h5 class="card-category"><strong>11. MÔ TẢ CHIẾN DỊCH</strong></h5>
+                  <h3 class="card-title"><i class="tim-icons icon-delivery-fast text-info"></i> </h3>
+              </div>
+
+          </div>
+      </div>
+      <div class="col-lg-4">
+          <div class="card card-chart" style="height:100px">
+              <div class="card-header">
+                  <h5 class="card-category"><strong>12. ----</strong></h5>
+                  <h3 class="card-title"><i class="tim-icons icon-send text-success"></i> </h3>
+              </div>
+          </div>
+      </div>
+  </div>
+
+
+    </div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+
+
+
+
+{% endblock javascripts %}
