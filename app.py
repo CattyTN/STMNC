@@ -1276,37 +1276,39 @@ def login_event():
     logs = get_login_event()
     logs = logs.fillna("N/A").replace("", "N/A")
 
-    total_pages = (len(logs) + 9) // 7   # giữ cách tính như ioc
+    total_rows = len(logs)
+    total_pages = (total_rows + 7 - 1) // 7     # ✔ Chính xác
+
     first_page_data = logs.iloc[:7]
-    m = 7
+
     current_user_role = get_user_role()
 
     return render_template(
         'login_event.html',
-        records=first_page_data,        # trong template: for index, row in records.iterrows()
+        records=first_page_data,
         total_pages=total_pages,
         current_page=1,
-        m=m,
+        m=7,
         current_user_role=current_user_role
     )
+
 
 @app.route('/login_event_page', methods=['GET'])
 @login_required
 @admin_required
 def login_event_page():
     current_page = int(request.args.get("page", 1))
-    print(current_page)
 
     logs = get_login_event()
     logs = logs.fillna("N/A").replace("", "N/A")
 
-    total_pages = (len(logs) + 9) // 7
-    print("------------------------")
-    print(total_pages)
+    total_rows = len(logs)
+    total_pages = (total_rows + 7 - 1) // 7      # ✔ Chính xác
+
     start = (current_page - 1) * 7
     end = start + 7
     paginated_data = logs.iloc[start:end]
-    m = 7
+
     current_user_role = get_user_role()
 
     return render_template(
@@ -1314,7 +1316,7 @@ def login_event_page():
         records=paginated_data,
         total_pages=total_pages,
         current_page=current_page,
-        m=m,
+        m=7,
         current_user_role=current_user_role
     )
 
