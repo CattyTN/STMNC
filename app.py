@@ -26,6 +26,7 @@ from docxtpl import DocxTemplate
 import tempfile
 import subprocess
 from functools import wraps
+import numpy as np
 
 app = Flask(__name__)
 app.secret_key = "your_secret_key"  
@@ -1864,6 +1865,47 @@ def export_report():
     doc.save(docx_path)
 
     return send_file(docx_path, as_attachment=True, download_name="baocao.docx")
+
+@app.route("/preview_report", methods=["GET"])
+def preview_report():
+    """
+    API xem trước thống kê báo cáo:
+    - Nhận ?from=...&to=...
+    - Gọi compute_report_stats để tính toán
+    - Trả về JSON (đã convert hết numpy.int64, numpy.float64, numpy.bool_)
+    """
+    start = request.args.get("from")
+    end = request.args.get("to")
+
+    try:
+        stats = compute_report_stats(start, end)
+        if not stats:
+            return jsonify({
+                "success": False,
+                "message": "Không có dữ liệu phù hợp trong khoảng thời gian đã chọn."
+            }), 200
+
+        # Chuyển hết về kiểu Python thuần để JSON hóa được
+        def to_serializable(x):
+            if isinstance(x, (np.integer, )):
+                return int(x)
+            if isinstance(x, (np.floating, )):
+                return float(x)
+            if isinstance(x, (np.bool_, )):
+                return bool(x)
+            return x
+
+        clean_stats = {k: to_serializable(v) for k, v in stats.items()}
+
+        return jsonify({
+            "success": True,
+            "data": clean_stats
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": f"Lỗi khi tính toán báo cáo: {str(e)}"
+        }), 500
 
 def compute_report_stats(start_date, end_date):
     query = {}

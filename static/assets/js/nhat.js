@@ -1589,3 +1589,201 @@ $(function () {
   });
 
 });
+
+
+function initExportReportFlow() {
+    const openLink   = document.getElementById('export_report_link');
+
+    // Modal 1: chọn ngày
+    const modal1     = document.getElementById('exportModal');
+    const btnClose1  = document.getElementById('export_close');
+    const btnCancel1 = document.getElementById('export_cancel');
+    const btnConfirm1= document.getElementById('export_confirm');
+    const inputFrom  = document.getElementById('export_from');
+    const inputTo    = document.getElementById('export_to');
+
+    const form       = document.getElementById('export_form');
+    const formFrom   = document.getElementById('export_form_from');
+    const formTo     = document.getElementById('export_form_to');
+
+    // Modal 2: xem thống kê
+    const modal2     = document.getElementById('exportPreviewModal');
+    const btnClose2  = document.getElementById('export_preview_close');
+    const btnCancel2 = document.getElementById('export_preview_cancel');
+    const btnDownload= document.getElementById('export_preview_download');
+    const previewBox = document.getElementById('export_preview_content');
+
+    if (!openLink || !modal1) {
+        return;
+    }
+
+    function openModal1()  { modal1.classList.add('show'); }
+    function closeModal1() { modal1.classList.remove('show'); }
+    function openModal2()  { if (modal2) modal2.classList.add('show'); }
+    function closeModal2() { if (modal2) modal2.classList.remove('show'); }
+
+    // --- MỞ MODAL 1 KHI BẤM "Xuất báo cáo" TRONG SIDEBAR ---
+    openLink.addEventListener('click', function (e) {
+        e.preventDefault();
+        openModal1();
+    });
+
+    // Đóng modal 1
+    if (btnClose1)  btnClose1.addEventListener('click', closeModal1);
+    if (btnCancel1) btnCancel1.addEventListener('click', closeModal1);
+    modal1.addEventListener('click', function (e) {
+        if (e.target === modal1) {
+            closeModal1();
+        }
+    });
+
+    // --- GẮN TEMPUS DOMINUS (GIỐNG SCRIPT CŨ) ---
+    if (window.tempusDominus && window.tempusDominus.TempusDominus) {
+        new tempusDominus.TempusDominus(
+            document.getElementById('export_from'),
+            {
+                display: {
+                    components: {
+                        calendar: true,
+                        date: true,
+                        month: true,
+                        year: true,
+                        decades: true,
+                        clock: true,
+                        hours: true,
+                        minutes: true,
+                        seconds: true
+                    }
+                },
+                localization: {
+                    format: 'yyyy-MM-dd HH:mm:ss',
+                    hourCycle: 'h23'
+                }
+            }
+        );
+
+        new tempusDominus.TempusDominus(
+            document.getElementById('export_to'),
+            {
+                display: {
+                    components: {
+                        calendar: true,
+                        date: true,
+                        month: true,
+                        year: true,
+                        decades: true,
+                        clock: true,
+                        hours: true,
+                        minutes: true,
+                        seconds: true
+                    }
+                },
+                localization: {
+                    format: 'yyyy-MM-dd HH:mm:ss',
+                    hourCycle: 'h23'
+                }
+            }
+        );
+    }
+
+    // --- HÀM RENDER THỐNG KÊ LÊN MODAL 2 ---
+    function renderPreview(stats, from, to) {
+        if (!previewBox) return;
+
+        // Có thể tuỳ biến thêm, đây là bản tối thiểu rõ ràng
+        previewBox.innerHTML = `
+            <p><strong>Khoảng thời gian:</strong> ${from} → ${to}</p>
+            <hr>
+            <p><strong>Tổng số bản ghi:</strong> ${stats.total_count}</p>
+            <p><strong>Bất thường:</strong> ${stats.abnormal_count} (${stats.abnormal_percent})</p>
+            <p><strong>Bình thường:</strong> ${stats.benign_count} (${stats.benign_percent})</p>
+            <hr>
+            <p><strong>Nguồn gây bất thường nhiều nhất:</strong><br>
+                MAC: ${stats.most_source_mac}<br>
+                Tên máy: ${stats.most_source_name}<br>
+                Đơn vị: ${stats.most_source_unit}
+            </p>
+            <p><strong>Đích bị tấn công nhiều nhất:</strong> ${stats.most_destination}</p>
+            <hr>
+            <p><strong>Thống kê theo đơn vị (bản ghi / %):</strong></p>
+            <ul>
+                <li>Quân khu: ${stats.quankhu_count} (${stats.quankhu_percent})</li>
+                <li>Quân đoàn: ${stats.quandoan_count} (${stats.quandoan_percent})</li>
+                <li>Trung tâm: ${stats.trungtam_count} (${stats.trungtam_percent})</li>
+                <li>Công binh: ${stats.congbinh_count} (${stats.congbinh_percent})</li>
+                <li>Thông tin: ${stats.thongtin_count} (${stats.thongtin_percent})</li>
+                <li>Biên phòng: ${stats.bienphong_count} (${stats.bienphong_percent})</li>
+                <li>Đặc công: ${stats.daccong_count} (${stats.daccong_percent})</li>
+                <li>Không quân: ${stats.khongquan_count} (${stats.khongquan_percent})</li>
+                <li>Hải quân: ${stats.haiquan_count} (${stats.haiquan_percent})</li>
+                <li>Bộ Tổng: ${stats.botong_count} (${stats.botong_percent})</li>
+            </ul>
+        `;
+    }
+
+    // --- NÚT "Xuất" TRONG MODAL 1: GỌI /preview_report, MỞ MODAL 2 ---
+    if (btnConfirm1) {
+        btnConfirm1.addEventListener('click', function () {
+            const from = (inputFrom.value || '').trim();
+            const to   = (inputTo.value || '').trim();
+
+            if (!from || !to) {
+                alert("Vui lòng điền đầy đủ Từ ngày và Đến ngày!");
+                return;
+            }
+
+            // Lưu sẵn vào form hidden, để modal 2 bấm "Xuất báo cáo" là submit luôn
+            if (formFrom) formFrom.value = from;
+            if (formTo)   formTo.value   = to;
+
+            // Gọi API xem trước
+            const url = `/preview_report?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(payload => {
+                    if (!payload.success) {
+                        alert(payload.message || "Không thể tính toán thống kê báo cáo.");
+                        return;
+                    }
+
+                    renderPreview(payload.data, from, to);
+
+                    // Đóng modal 1, mở modal 2
+                    closeModal1();
+                    openModal2();
+                })
+                .catch(error => {
+                    console.error("Lỗi khi xem trước báo cáo:", error);
+                    alert("Đã xảy ra lỗi khi xem trước báo cáo.");
+                });
+        });
+    }
+
+    // --- NÚT Ở MODAL 2 ---
+    if (btnClose2)  btnClose2.addEventListener('click', closeModal2);
+    if (btnCancel2) btnCancel2.addEventListener('click', closeModal2);
+
+    if (modal2) {
+        modal2.addEventListener('click', function (e) {
+            if (e.target === modal2) {
+                closeModal2();
+            }
+        });
+    }
+
+    // Nút "Xuất báo cáo" trong Modal 2 -> lúc này mới submit form, sinh file docx
+    if (btnDownload) {
+        btnDownload.addEventListener('click', function () {
+            if (form) {
+                form.submit();   // POST /export_report
+            }
+            closeModal2();
+        });
+    }
+}
+
+// Gọi init khi DOM ready
+document.addEventListener('DOMContentLoaded', function () {
+    initExportReportFlow();
+});

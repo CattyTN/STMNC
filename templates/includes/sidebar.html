@@ -1,112 +1,110 @@
 <style>
+/* ====================== SIDEBAR ====================== */
+.sidebar {
+    background: #fff;
+}
 
-  /* Sidebar Scrollable - Override existing styles */
-  .sidebar,
-  .off-canvas-sidebar {
-    height: calc(100vh - 80px) !important;
-    margin-top: 80px !important;
-    display: flex !important;
-    flex-direction: column !important;
-  }
+.sidebar .nav li > a {
+    color: black !important;
+}
 
-  .sidebar-wrapper {
-    display: flex !important;
-    flex-direction: column !important;
-    height: 100% !important;
-    max-height: none !important;
-    overflow: visible !important;
-    flex: 1 !important;
-  }
+/* ====================== MODAL XUẤT BÁO CÁO ====================== */
 
-  .sidebar-wrapper .logo {
-    flex-shrink: 0;
-    padding-bottom: 15px;
-    border-bottom: 1px solid #e3e3e3;
-  }
-
-  .sidebar-wrapper .nav {
-    flex: 1 !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    padding-top: 15px;
-    min-height: 0;
-  }
-
-  /* Scrollbar styling (optional) */
-  .sidebar-wrapper .nav::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  .sidebar-wrapper .nav::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  .sidebar-wrapper .nav::-webkit-scrollbar-thumb {
-    background: #ccc;
-    border-radius: 3px;
-  }
-
-  .sidebar-wrapper .nav::-webkit-scrollbar-thumb:hover {
-    background: #999;
-  }
-
-    .export-modal {
+/* Nền tối phủ toàn màn hình */
+.export-modal {
     position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.5);
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.4);
     display: none;
     align-items: center;
     justify-content: center;
-    z-index: 2000;
-  }
+    z-index: 9999;
+    padding: 20px;
+}
 
-  .export-modal.show {
+/* Hiển thị modal */
+.export-modal.show {
     display: flex;
-  }
+}
 
-  .export-modal-dialog {
+/* Hộp modal */
+.export-modal-dialog {
     background: #fff;
     border-radius: 8px;
     max-width: 480px;
     width: 100%;
     box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-  }
 
-  .export-modal-header,
-  .export-modal-footer {
+    /* Cho phép modal cao tối đa 90% màn hình và cuộn phần body */
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header & Footer */
+.export-modal-header,
+.export-modal-footer {
     padding: 12px 16px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-  }
+    background: #f5f6f8;
+    border-bottom: 1px solid #ddd;
+}
 
-  .export-modal-body {
+.export-modal-footer {
+    border-top: 1px solid #ddd;
+    border-bottom: none;
+}
+
+/* Nội dung modal có thể cuộn */
+.export-modal-body {
     padding: 16px;
-  }
+    overflow-y: auto;
+    flex: 1;
+}
 
-  .export-close {
+/* Nút đóng */
+.export-close {
+    background: none;
     border: none;
-    background: transparent;
-    font-size: 24px;
-    line-height: 1;
+    font-size: 20px;
     cursor: pointer;
-  }
+}
 
-  .export-modal .form-group {
-    margin-bottom: 12px;
-  }
-
-  /* input trong modal có picker -> trông giống giám sát */
-  .export-modal .form-control {
+/* Nút */
+.btn {
+    padding: 8px 18px;
+    border-radius: 5px;
+    font-size: 14px;
     cursor: pointer;
-    background-color: #fff;
-  }
+}
 
-  /* đảm bảo widget datetime nổi trên modal */
-  .tempus-dominus-widget {
-    z-index: 3001 !important;
-  }
+.btn-primary {
+    background: #007bff;
+    color: white;
+    border: none;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+    border: none;
+}
+
+/* Danh sách */
+.export-modal-body ul {
+    padding-left: 20px;
+}
+
+.export-modal-body li {
+    margin-bottom: 4px;
+}
 </style>
+
     <div class="sidebar">
         <!--
           Tip 1: You can change the color of the sidebar using: data-color="blue | green | orange | red"
@@ -208,6 +206,26 @@
   </div>
 </div>
 
+<!-- MODAL XEM TRƯỚC THỐNG KÊ TRƯỚC KHI XUẤT FILE -->
+<div id="exportPreviewModal" class="export-modal">
+  <div class="export-modal-dialog">
+    <div class="export-modal-header">
+      <h5>Thống kê báo cáo</h5>
+      <button type="button" id="export_preview_close" class="export-close">&times;</button>
+    </div>
+    <div class="export-modal-body">
+      <div id="export_preview_content">
+      </div>
+    </div>
+    <div class="export-modal-footer">
+      <button type="button" id="export_preview_cancel" class="btn btn-secondary">Đóng</button>
+      <button type="button" id="export_preview_download" class="btn btn-primary">
+        Xuất báo cáo
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- form ẩn gửi về backend -->
 <form id="export_form" method="POST" action="/export_report" target="_blank">
   <input type="hidden" name="from" id="export_form_from">
@@ -216,100 +234,7 @@
 
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const openLink   = document.getElementById('export_report_link');
-    const modal      = document.getElementById('exportModal');
-    const btnClose   = document.getElementById('export_close');
-    const btnCancel  = document.getElementById('export_cancel');
-    const btnConfirm = document.getElementById('export_confirm');
-    const inputFrom  = document.getElementById('export_from');
-    const inputTo    = document.getElementById('export_to');
 
-    const form       = document.getElementById('export_form');
-    const formFrom   = document.getElementById('export_form_from');
-    const formTo     = document.getElementById('export_form_to');
-
-    if (!openLink || !modal) return;
-
-    function openModal()  { modal.classList.add('show'); }
-    function closeModal() { modal.classList.remove('show'); }
-
-    openLink.addEventListener('click', function (e) {
-        e.preventDefault();
-        openModal();
-    });
-
-    btnClose.addEventListener('click', closeModal);
-    btnCancel.addEventListener('click', closeModal);
-
-    modal.addEventListener('click', function (e) {
-        if (e.target === modal) closeModal();
-    });
-
-    // Gắn Tempus Dominus giống GIÁM SÁT
-    const picker_export_from = new tempusDominus.TempusDominus(
-        document.getElementById('export_from'),
-        {
-            display: {
-                components: {
-                    calendar: true,
-                    date: true,
-                    month: true,
-                    year: true,
-                    decades: true,
-                    clock: true,
-                    hours: true,
-                    minutes: true,
-                    seconds: true
-                }
-            },
-            localization: {
-                format: 'yyyy-MM-dd HH:mm:ss',
-                hourCycle: 'h23'
-            }
-        }
-    );
-
-    const picker_export_to = new tempusDominus.TempusDominus(
-        document.getElementById('export_to'),
-        {
-            display: {
-                components: {
-                    calendar: true,
-                    date: true,
-                    month: true,
-                    year: true,
-                    decades: true,
-                    clock: true,
-                    hours: true,
-                    minutes: true,
-                    seconds: true
-                }
-            },
-            localization: {
-                format: 'yyyy-MM-dd HH:mm:ss',
-                hourCycle: 'h23'
-            }
-        }
-    );
-
-    btnConfirm.addEventListener('click', function () {
-        const from = (inputFrom.value || '').trim();
-        const to   = (inputTo.value || '').trim();
-
-        if (!from || !to) {
-            alert("Vui lòng điền đầy đủ Từ ngày và Đến ngày!");
-            return;
-        }
-
-        // gửi thẳng format yyyy-MM-dd HH:mm:ss cho backend
-        formFrom.value = from;
-        formTo.value   = to;
-
-        form.submit();
-        closeModal();
-    });
-});
 </script>
 
 
