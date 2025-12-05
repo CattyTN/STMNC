@@ -96,13 +96,13 @@ table tbody td {
                   {%else%}
                   {% for index, row in records.iterrows() %}
                   <tr>
-                    <td scope="col" class="sort col-2" style="font-size: 12px;">{{ row['username'] }}</td>
-                    <td scope="col" class="sort col-2" style="font-size: 12px;">{{ row['unit_name'] }}</td>
-                    <td scope="col" class="sort col-2" style="font-size: 12px;">{{ row['create_time'] }}</td>
-                    <td scope="col" class="sort col-2" style="font-size: 12px;">{{ row['role'] }}</td>
+                    <td scope="col" class="sort col-2">{{ row['username'] }}</td>
+                    <td scope="col" class="sort col-2">{{ row['unit_name'] }}</td>
+                    <td scope="col" class="sort col-2">{{ row['create_time'] }}</td>
+                    <td scope="col" class="sort col-2">{{ row['role'] }}</td>
 
                     <!-- Cột Edit -->
-                    <td scope="col" class="sort col-1" style="font-size: 12px;">
+                    <td scope="col" class="sort col-1">
                       <a href="#"
                         class="edit-user"
                         data-username="{{ row['username'] }}"
@@ -113,7 +113,7 @@ table tbody td {
                     </td>
 
                     <!-- Cột Xóa -->
-                    <td scope="col" class="sort col-1" style="font-size: 12px;">
+                    <td scope="col" class="sort col-1">
                       <a href="#"><i class="tim-icons icon-trash-simple user" id="{{row['username']}}"></i></a>
                     </td>
                   </tr>

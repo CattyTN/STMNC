@@ -103,19 +103,19 @@ html, body {
                   {% for index, row in records.iterrows() %}
                   {%if row['label'] == 1%}
                   <tr >
-                    <td scope="col" class="sort col-2" style="font-size: 12px; background-color: #ff3232;"> {{ row['ip'] }}</td>
-                    <td scope="col" class="sort col-2" style="font-size: 12px; background-color: #ff3232;">{{ row['mac'] }}</td>
-                    <td scope="col" class="sort col-2" style="font-size: 12px; background-color: #ff3232;">{{ row['time_receive'] }}</td>
-                    <td scope="col" class="sort col-4" style="font-size: 12px; background-color: #ff3232;">{{ row['unit_full_name'] }}</td>
-                    <td scope="col" class="sort col-3" style="font-size: 12px; background-color: #ff3232; "><a href="{{ url_for('detail', ioc=row['extracted_ip'], mac=row['mac']) }}" style="color:#2e2434;">{{ row['description'] }}</a></td>
+                    <td scope="col" class="sort col-2" style="background-color: #ff3232;"> {{ row['ip'] }}</td>
+                    <td scope="col" class="sort col-2" style="background-color: #ff3232;">{{ row['mac'] }}</td>
+                    <td scope="col" class="sort col-2" style="background-color: #ff3232;">{{ row['time_receive'] }}</td>
+                    <td scope="col" class="sort col-4" style="background-color: #ff3232;">{{ row['unit_full_name'] }}</td>
+                    <td scope="col" class="sort col-3" style="background-color: #ff3232; "><a href="{{ url_for('detail', ioc=row['extracted_ip'], mac=row['mac']) }}" style="color:#2e2434;">{{ row['description'] }}</a></td>
                   </tr>
                   {%else%}
                   <tr>
-                    <td scope="col" class="sort col-2" style="font-size: 12px;">{{ row['ip'] }}</td>
-                    <td scope="col" class="sort col-2" style="font-size: 12px;">{{ row['mac'] }}</td>
-                    <td scope="col" class="sort col-2" style="font-size: 12px;">{{ row['time_receive'] }}</td>
-                    <td scope="col" class="sort col-3" style="font-size: 12px;">{{ row['unit_full_name'] }}</td>
-                    <td scope="col" class="sort col-3" style="font-size: 12px;"><a href="{{ url_for('detail', ioc=row['extracted_ip'], mac=row['mac']) }}" style="color:#2e2434;" >{{ row['description'] }}</a></td>
+                    <td scope="col" class="sort col-2">{{ row['ip'] }}</td>
+                    <td scope="col" class="sort col-2">{{ row['mac'] }}</td>
+                    <td scope="col" class="sort col-2">{{ row['time_receive'] }}</td>
+                    <td scope="col" class="sort col-3">{{ row['unit_full_name'] }}</td>
+                    <td scope="col" class="sort col-3"><a href="{{ url_for('detail', ioc=row['extracted_ip'], mac=row['mac']) }}" style="color:#2e2434;" >{{ row['description'] }}</a></td>
                   </tr>
                   {%endif%}
                   {% endfor %}
