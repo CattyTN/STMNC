@@ -1618,17 +1618,17 @@ def convert_password(plain_text):
     return hashed_password
 
 def log_login_event(username, status):
-    """Ghi lại log đăng nhập vào collection login_event"""
+    """Ghi lại log đăng nhập / đăng xuất vào collection login_event"""
 
     ip = request.headers.get('X-Forwarded-For', '').split(',')[0].strip() or request.remote_addr
     user_agent = request.headers.get('User-Agent', '')
-    login_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     login_event_collection.insert_one({
         "username": username,
         "ip": ip,
-        "login_time": login_time,
-        "status": status,        # "success" hoặc "failed"
+        "time": current_time,
+        "status": status,        # success / failed / logout
         "user_agent": user_agent
     })
 
