@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, flash
+from flask import Flask, render_template, request, flash, send_file
 from flask import jsonify
 from flask import session
 import pandas as pd
@@ -9,15 +9,13 @@ from collections import Counter
 import hashlib
 import requests
 import threading
-from flask import redirect, url_for, Response, stream_with_context
+from flask import redirect, url_for, Response, stream_with_context, abort
 from sshtunnel import SSHTunnelForwarder
-from pymongo import MongoClient
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 import re
 from pymongo import MongoClient
 import urllib3
 import uuid
-from flask import send_file, request
 from io import BytesIO
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
@@ -27,6 +25,7 @@ import os
 from docxtpl import DocxTemplate
 import tempfile
 import subprocess
+from functools import wraps
 
 app = Flask(__name__)
 app.secret_key = "your_secret_key"  
@@ -117,6 +116,24 @@ def get_device():
 #    if "_id" in df.columns:
 #        df.drop(columns=["_id"], inplace=True)
 #    return df
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        # Chưa đăng nhập thì dùng cơ chế sẵn có của login_manager
+        if not current_user.is_authenticated:
+            return login_manager.unauthorized()
+
+        # Lấy role từ Mongo
+        role = get_user_role()
+
+        # Chỉ cho admin (hoặc quyền bạn quy ước) truy cập
+        if role != "admin":
+            # Có thể dùng abort(403) nếu muốn trả lỗi
+            # return abort(403)
+            return redirect(url_for("index"))  # hoặc trang dashboard của user thường
+
+        return f(*args, **kwargs)
+    return decorated_function
 def get_search_and_backup():
     user_id = current_user.id
     doc = search_and_backup_collection.find_one({"user_id": user_id})
@@ -508,6 +525,7 @@ def monitor_page():
 
 @app.route('/user_managerment', methods=['GET', 'POST'])
 @login_required
+@admin_required
 def user_managerment():
     user_data = get_users()
     total_pages = (len(user_data) + 7) // 7
@@ -518,6 +536,7 @@ def user_managerment():
 
 @app.route('/user_managerment_page', methods=['GET', 'POST'])
 @login_required
+@admin_required
 def user_managerment_page():
     current_page = int(request.args.get("page", 1))  
     print(current_page)
@@ -534,6 +553,7 @@ def user_managerment_page():
 
 @app.route('/add_user', methods=['GET', 'POST'])
 @login_required
+@admin_required
 def add_user():
     data = request.get_json()
     required_fields = ["username", "password", "unit", "role"]
@@ -570,7 +590,9 @@ def add_user():
 
 
 @app.route('/delete_user', methods=['GET', 'POST'])
+
 @login_required
+@admin_required
 def delete_user():
     data = request.get_json()
     username = data["username"]
@@ -1117,6 +1139,7 @@ def import_file():
 
 @app.route('/login_event', methods=['GET', 'POST'])
 @login_required
+@admin_required
 def login_event():
     logs = get_login_event()
     logs = logs.fillna("N/A").replace("", "N/A")
@@ -1137,6 +1160,7 @@ def login_event():
 
 @app.route('/login_event_page', methods=['GET'])
 @login_required
+@admin_required
 def login_event_page():
     current_page = int(request.args.get("page", 1))
     print(current_page)
