@@ -537,20 +537,36 @@ def user_managerment_page():
 def add_user():
     data = request.get_json()
     required_fields = ["username", "password", "unit", "role"]
+
+    # Kiểm tra thiếu dữ liệu
     for field in required_fields:
-        if field not in data or not data[field]:
+        if field not in data or not data[field].strip():
             return jsonify({"success": False, "message": f"Trường {field} không được để trống!"})
+
+    username = data["username"].strip()
+
+    # KIỂM TRA username đã tồn tại chưa
+    existed = user_collection.find_one({"username": username})
+    if existed:
+        return jsonify({
+            "success": False,
+            "message": "Người dùng đã tồn tại trong hệ thống!"
+        })
+
+    # Hash password
     hash_password = hashlib.sha256(data['password'].encode()).hexdigest()
+
     user_data = {
-        "username": data["username"],  
+        "username": username,
         "password": hash_password,
         "unit_name": data["unit"],
         "create_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "role": data.get("role", "N/A")
     }
-    print(user_data)
+
     user_collection.insert_one(user_data)
-    return jsonify({"success": True, "message": "Thêm mới mối đe dọa thành công!"})
+
+    return jsonify({"success": True, "message": "Thêm mới người dùng thành công!"})
 
 
 @app.route('/delete_user', methods=['GET', 'POST'])
