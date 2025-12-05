@@ -53,6 +53,40 @@ html, body {
   padding-bottom: 0;
 }
 
+.ioc-toggle-btn {
+  position: relative;
+  width: 46px;
+  height: 24px;
+  border: none;
+  border-radius: 24px;
+  background-color: #b0b0b0; /* OFF: xám */
+  cursor: pointer;
+  padding: 0;
+  outline: none;
+}
+
+/* nút tròn bên trong */
+.ioc-toggle-btn::before {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background-color: white;
+  left: 3px;
+  top: 3px;
+  transition: transform 0.25s ease, background-color 0.25s ease;
+}
+
+/* trạng thái ON */
+.ioc-toggle-btn.on {
+  background-color: #00c853; /* xanh lá */
+}
+
+.ioc-toggle-btn.on::before {
+  transform: translateX(22px);
+}
+
 </style>
 {% endblock stylesheets %}
 
@@ -75,21 +109,29 @@ html, body {
               <table class="table tablesorter align-items-center" id="">
                 <thead class="text-primary">
                   <tr>
-                    <th scope="col" class="sort col-3" >IOC</th>
+                    <th scope="col" class="sort col-2" >IOC</th>
                     <th scope="col" class="sort col-3">NGƯỜI/TỔ CHỨC BÁO CÁO</th>
                     <th scope="col" class="sort col-2">LOẠI MỐI ĐE DỌA</th>
                     <th scope="col" class="sort col-2">TRẠNG THÁI</th>
+                    <th scope="col" class="sort col-1">GIÁM SÁT</th>
                     <th scope="col" class="sort col-1">XÓA</th>
                   </tr>
                 </thead>
                 <tbody id="table-body">
                   {% for index, row in indicator.iterrows() %}
                   <tr>
-                    <td class="sort col-3" style="font-size: 12px;">{{ row['url'] }}</td>
+                    <td class="sort col-2" style="font-size: 12px;">{{ row['url'] }}</td>
                     <td class="sort col-3" style="font-size: 12px;">{{ row['reporter'] }}</td>
                     <td class="sort col-3" style="font-size: 12px;">{{ row['threat'] }}</td>
                     <td class="sort col-2" style="font-size: 12px;">{{ row['status'] }}</td>
-
+    <!-- Nút ON/OFF, KHÔNG dùng checkbox để khỏi đụng theme -->
+                    <td class="sort col-2" style="font-size: 12px;">
+                      <button type="button"
+                              class="ioc-toggle-btn"
+                              data-ioc-id="{{ row['id'] }}"
+                              data-status="{{ row['status'] }}">
+                      </button>
+                    </td>
                     <!-- Cột XÓA theo ID -->
                     <td class="sort col-1" style="font-size: 12px;">
                       <a href="#" class="delete-ioc" data-ioc-id="{{ row['id'] }}">

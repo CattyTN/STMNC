@@ -1421,3 +1421,52 @@ function delete_ioc_listener() {
         });
     });
 }
+
+window.addEventListener('load', function () {
+    init_ioc_toggle();
+});
+
+function init_ioc_toggle() {
+    const buttons = document.querySelectorAll(".ioc-toggle-btn");
+    if (!buttons.length) return;
+
+    buttons.forEach(btn => {
+        const status = (btn.dataset.status || "").toLowerCase();
+        btn.classList.toggle("on", status === "online");
+
+        btn.addEventListener("click", function () {
+            toggleIOC(this);
+        });
+    });
+}
+
+function toggleIOC(btn) {
+    const iocId = btn.dataset.iocId;
+    if (!iocId) return;
+
+    const willOn = !btn.classList.contains("on");
+    const newStatus = willOn ? "online" : "offline";
+
+    // Optimistic UI
+    btn.classList.toggle("on", willOn);
+
+    fetch("/update_ioc_status", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: iocId, status: newStatus })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (!data.success) {
+            // revert nếu backend không xử lý được
+            btn.classList.toggle("on", !willOn);
+        } else {
+            btn.dataset.status = newStatus;
+        }
+    })
+    .catch(() => {
+        // revert nếu có lỗi kết nối
+        btn.classList.toggle("on", !willOn);
+    });
+}
+

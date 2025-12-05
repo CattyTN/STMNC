@@ -396,6 +396,25 @@ def delete_ioc():
 
     return jsonify({"success": True, "message": "Xóa IOC thành công!"})
 
+@app.route('/update_ioc_status', methods=['POST'])
+@login_required
+@admin_required   # hoặc bỏ nếu user thường được phép
+def update_ioc_status():
+    data = request.get_json() or {}
+    ioc_id = data.get("id")
+    status = (data.get("status") or "").lower()
+
+    if not ioc_id or status not in ["online", "offline"]:
+        return jsonify({"success": False})
+
+    result = indicator_collection.update_one(
+        {"id": ioc_id},
+        {"$set": {"status": status}}
+    )
+
+    return jsonify({"success": result.matched_count == 1})
+
+
 
 def relabel_all_search_and_backup(ioc_url):
     """
