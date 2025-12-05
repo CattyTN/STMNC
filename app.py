@@ -27,6 +27,9 @@ import tempfile
 import subprocess
 from functools import wraps
 import numpy as np
+import platform
+from docx2pdf import convert as docx2pdf_convert
+import subprocess
 
 app = Flask(__name__)
 app.secret_key = "your_secret_key"  
@@ -1864,7 +1867,48 @@ def export_report():
     docx_path = os.path.join(temp_dir, "report.docx")
     doc.save(docx_path)
 
-    return send_file(docx_path, as_attachment=True, download_name="baocao.docx")
+    # Convert DOCX -> PDF bằng LibreOffice (soffice)
+    pdf_path = os.path.join(temp_dir, "baocao.pdf")
+
+    system_os = platform.system().lower()
+
+    try:
+        if "windows" in system_os:
+            # Windows → dùng docx2pdf
+            docx2pdf_convert(docx_path, pdf_path)
+
+        else:
+            # Linux → dùng LibreOffice
+            subprocess.run(
+                [
+                    "soffice",
+                    "--headless",
+                    "--convert-to", "pdf",
+                    "--outdir", temp_dir,
+                    docx_path,
+                ],
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
+
+        # Trả file PDF
+        return send_file(
+            pdf_path,
+            as_attachment=True,
+            download_name="baocao.pdf",
+            mimetype="application/pdf"
+        )
+
+    except Exception as e:
+        print("Lỗi convert DOCX → PDF:", e)
+
+        # Fallback: vẫn gửi file DOCX nếu lỗi
+        return send_file(
+            docx_path,
+            as_attachment=True,
+            download_name="baocao.docx"
+        )
 
 @app.route("/preview_report", methods=["GET"])
 def preview_report():
