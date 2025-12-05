@@ -577,8 +577,8 @@ def monitor():
         records = get_record()
 
     records = records.fillna("N/A").replace("", "N/A")
-    total_pages = (len(records) + 7) // 7
-    first_page_data = records.iloc[:7]
+    total_pages = (len(records) + 9) // 9
+    first_page_data = records.iloc[:9]
     a = len(records)
     current_user_role = get_user_role()
     return render_template('monitor.html', records=first_page_data, total_pages=total_pages, current_page = 1, a = a,current_user_role=current_user_role)
@@ -603,12 +603,12 @@ def monitor_page():
         records = get_record()
 
     records = records.fillna("N/A").replace("", "N/A")
-    total_pages = (len(records) + 7) // 7 
-    start = (current_page - 1) * 7  
-    end = start + 7 
+    total_pages = (len(records) + 9) // 9 
+    start = (current_page - 1) * 9  
+    end = start + 9
     paginated_data = records.iloc[start:end]
     current_user_role = get_user_role()
-    return render_template('monitor.html', records=paginated_data, total_pages=total_pages, current_page = current_page, m = 7,current_user_role=current_user_role)
+    return render_template('monitor.html', records=paginated_data, total_pages=total_pages, current_page = current_page, m = 9,current_user_role=current_user_role)
 
 
 
