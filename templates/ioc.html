@@ -13,7 +13,12 @@ thead th,
 tbody td {
   text-align: center !important;
   vertical-align: middle;
-  font-size: 12px;
+  font-size: 20px;
+}
+
+thead th {
+  font-size: 16px !important;
+  font-weight: bold;
 }
 
 /* Tối hơn nền để nổi bật các khối card */
@@ -136,12 +141,12 @@ table tbody td {
                 <tbody id="table-body">
   {% for index, row in indicator.iterrows() %}
   <tr>
-    <td class="sort col-2" style="font-size: 12px;">{{ row['url'] }}</td>
-    <td class="sort col-3" style="font-size: 12px;">{{ row['reporter'] }}</td>
-    <td class="sort col-3" style="font-size: 12px;">{{ row['threat'] }}</td>
+    <td class="sort col-2">{{ row['url'] }}</td>
+    <td class="sort col-3">{{ row['reporter'] }}</td>
+    <td class="sort col-3">{{ row['threat'] }}</td>
 
     <!-- CỘT SỬA: dùng modal EDIT riêng -->
-    <td class="sort col-1" style="font-size: 12px;">
+    <td class="sort col-1">
       <a href="#"
          class="edit-ioc"
          data-toggle="modal"
@@ -159,7 +164,7 @@ table tbody td {
     </td>
 
     <!-- CỘT GIÁM SÁT (TOGGLE) -->
-    <td class="sort col-1" style="font-size: 12px;">
+    <td class="sort col-1">
       <button type="button"
               class="ioc-toggle-btn"
               data-ioc-id="{{ row['id'] }}"
@@ -168,7 +173,7 @@ table tbody td {
     </td>
 
     <!-- CỘT XÓA -->
-    <td class="sort col-1" style="font-size: 12px;">
+    <td class="sort col-1">
       <a href="#" class="delete-ioc" data-ioc-id="{{ row['id'] }}">
         <i class="tim-icons icon-trash-simple"></i>
       </a>
