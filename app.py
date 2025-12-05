@@ -61,6 +61,7 @@ intrusion_set_collection = db["intrusion_set"]
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+PAGE_SIZE = 10
 # path tới thư mục fonts trong project
 font_regular = os.path.join(app.root_path, "static","assets", "fonts", "times.ttf")
 font_bold    = os.path.join(app.root_path, "static","assets", "fonts", "timesbd.ttf")
@@ -359,26 +360,43 @@ def virus_check():
 def ioc():
     indicator = get_indicator()
     indicator = indicator.fillna("N/A").replace("", "N/A")
-    indicator_json = indicator.to_dict(orient='records')
-    total_pages = (len(indicator) + 9) // 7
-    first_page_data = indicator.iloc[:7]
-    m = 7
+
+    total_pages = (len(indicator) + PAGE_SIZE - 1) // PAGE_SIZE
+    first_page_data = indicator.iloc[:PAGE_SIZE]
+
     current_user_role = get_user_role()
-    return render_template('ioc.html', indicator=first_page_data, total_pages=total_pages, current_page = 1, m = 7, current_user_role=current_user_role)
+    return render_template(
+        'ioc.html',
+        indicator=first_page_data,
+        total_pages=total_pages,
+        current_page=1,
+        m=PAGE_SIZE,
+        current_user_role=current_user_role
+    )
+
 
 @app.route('/ioc_page', methods=['GET'])
 @login_required
 def ioc_page():
-    current_page = int(request.args.get("page", 1))  # Lấy số trang từ URL
+    current_page = int(request.args.get("page", 1))
+
     indicator = get_indicator()
     indicator = indicator.fillna("N/A").replace("", "N/A")
 
-    total_pages = (len(indicator) + 9) // 7  # Tính tổng số trang
-    start = (current_page - 1) * 7  # Dòng bắt đầu
-    end = start + 7  # Dòng kết thúc
+    total_pages = (len(indicator) + PAGE_SIZE - 1) // PAGE_SIZE
+    start = (current_page - 1) * PAGE_SIZE
+    end = start + PAGE_SIZE
     paginated_data = indicator.iloc[start:end]
+
     current_user_role = get_user_role()
-    return render_template('ioc.html', indicator=paginated_data, total_pages=total_pages, current_page = current_page, m = 7, current_user_role=current_user_role)
+    return render_template(
+        'ioc.html',
+        indicator=paginated_data,
+        total_pages=total_pages,
+        current_page=current_page,
+        m=PAGE_SIZE,
+        current_user_role=current_user_role
+    )
 
 @app.route('/delete_ioc', methods=['POST'])
 @login_required
@@ -593,33 +611,51 @@ def monitor_page():
     return render_template('monitor.html', records=paginated_data, total_pages=total_pages, current_page = current_page, m = 7,current_user_role=current_user_role)
 
 
+
 @app.route('/user_managerment', methods=['GET', 'POST'])
 @login_required
 @admin_required
 def user_managerment():
     user_data = get_users()
-    total_pages = (len(user_data) + 7) // 7
-    first_page_data = user_data.iloc[:7]
-    m = 7
+
+    total_pages = (len(user_data) + PAGE_SIZE - 1) // PAGE_SIZE
+    first_page_data = user_data.iloc[:PAGE_SIZE]
+
     current_user_role = get_user_role()
-    return render_template('user_managerment.html', records=first_page_data, total_pages=total_pages, current_page = 1, m = 7,current_user_role=current_user_role)
+    return render_template(
+        'user_managerment.html',
+        records=first_page_data,
+        total_pages=total_pages,
+        current_page=1,
+        m=PAGE_SIZE,
+        current_user_role=current_user_role
+    )
+
 
 @app.route('/user_managerment_page', methods=['GET', 'POST'])
 @login_required
 @admin_required
 def user_managerment_page():
-    current_page = int(request.args.get("page", 1))  
+    current_page = int(request.args.get("page", 1))
     print(current_page)
+
     user_data = get_users()
     user_data = user_data.fillna("N/A").replace("", "N/A")
 
-    total_pages = (len(user_data) + 7) // 7 
-    start = (current_page - 1) * 7  
-    end = start + 7 
+    total_pages = (len(user_data) + PAGE_SIZE - 1) // PAGE_SIZE
+    start = (current_page - 1) * PAGE_SIZE
+    end = start + PAGE_SIZE
     paginated_data = user_data.iloc[start:end]
-    current_user_role = get_user_role()
-    return render_template('user_managerment.html', records=paginated_data, total_pages=total_pages, current_page = current_page, m = 7,current_user_role=current_user_role)
 
+    current_user_role = get_user_role()
+    return render_template(
+        'user_managerment.html',
+        records=paginated_data,
+        total_pages=total_pages,
+        current_page=current_page,
+        m=PAGE_SIZE,
+        current_user_role=current_user_role
+    )
 
 @app.route('/add_user', methods=['GET', 'POST'])
 @login_required
