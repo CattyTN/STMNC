@@ -1651,6 +1651,13 @@ def export_report():
         "quankhu_count":    stats["quankhu_count"],
         "quandoan_count":   stats["quandoan_count"],
         "trungtam_count":   stats["trungtam_count"],
+        "congbinh_count":   stats["congbinh_count"],
+        "thongtin_count":   stats["thongtin_count"],
+        "bienphong_count":  stats["bienphong_count"],
+        "daccong_count":    stats["daccong_count"],
+        "khongquan_count":  stats["khongquan_count"],
+        "haiquan_count":    stats["haiquan_count"],
+        "botong_count":     stats["botong_count"],
 
         # THÊM CÁC TRƯỜNG % Ở ĐÂY
         "abnormal_percent":  stats["abnormal_percent"],
@@ -1658,6 +1665,13 @@ def export_report():
         "quankhu_percent":   stats["quankhu_percent"],
         "quandoan_percent":  stats["quandoan_percent"],
         "trungtam_percent":  stats["trungtam_percent"],
+        "congbinh_percent":  stats["congbinh_percent"],
+        "thongtin_percent":  stats["thongtin_percent"],
+        "bienphong_percent": stats["bienphong_percent"],
+        "daccong_percent":   stats["daccong_percent"],
+        "khongquan_percent": stats["khongquan_percent"],
+        "haiquan_percent":   stats["haiquan_percent"],
+        "botong_percent":    stats["botong_percent"],
     }
 
     doc.render(context)
@@ -1694,6 +1708,14 @@ def compute_report_stats(start_date, end_date):
             "quankhu_count": 0,
             "quandoan_count": 0,
             "trungtam_count": 0,
+            "congbinh_count":0,
+            "thongtin_count": 0,
+            "bienphong_count": 0,
+            "daccong_count": 0,
+            "khongquan_count": 0,
+            "haiquan_count": 0,
+            "botong_count": 0,
+
 
             # Luôn trả về string "0.00 %"
             "abnormal_percent": "0.00 %",
@@ -1701,6 +1723,13 @@ def compute_report_stats(start_date, end_date):
             "quankhu_percent": "0.00 %",
             "quandoan_percent": "0.00 %",
             "trungtam_percent": "0.00 %",
+            "congbinh_percent": "0.00 %",
+            "thongtin_percent": "0.00 %",
+            "bienphong_percent": "0.00 %",
+            "daccong_percent": "0.00 %",
+            "khongquan_percent": "0.00 %",
+            "haiquan_percent": "0.00 %",
+            "botong_percent": "0.00 %",
         }
 
     total_count    = len(df)
@@ -1735,6 +1764,13 @@ def compute_report_stats(start_date, end_date):
     quankhu_count  = unit_series.str.contains("quân khu 5",  case=False, na=False).sum()
     quandoan_count = unit_series.str.contains("quân đoàn",  case=False, na=False).sum()
     trungtam_count = unit_series.str.contains("386",        case=False, na=False).sum()
+    congbinh_count = unit_series.str.contains("công binh",  case=False, na=False).sum()
+    thongtin_count = unit_series.str.contains("thông tin",  case=False, na=False).sum()
+    bienphong_count= unit_series.str.contains("biên phòng", case=False, na=False).sum()
+    daccong_count  = unit_series.str.contains("đặc công",   case=False, na=False).sum()
+    khongquan_count= unit_series.str.contains("không quân", case=False, na=False).sum()
+    haiquan_count  = unit_series.str.contains("hải quân",   case=False, na=False).sum()
+    botong_count   = unit_series.str.contains("bộ tổng",    case=False, na=False).sum()
 
     return {
         "total_count": total_count,
@@ -1749,6 +1785,13 @@ def compute_report_stats(start_date, end_date):
         "quankhu_count": quankhu_count,
         "quandoan_count": quandoan_count,
         "trungtam_count": trungtam_count,
+        "congbinh_count":congbinh_count,
+        "thongtin_count": thongtin_count,
+        "bienphong_count": bienphong_count,
+        "daccong_count": daccong_count,
+        "khongquan_count": khongquan_count,
+        "haiquan_count": haiquan_count,
+        "botong_count": botong_count,
 
         # Luôn trả string dạng "xx.xx %"
         "abnormal_percent": pct(abnormal_count),
@@ -1756,6 +1799,13 @@ def compute_report_stats(start_date, end_date):
         "quankhu_percent": pct(quankhu_count),
         "quandoan_percent": pct(quandoan_count),
         "trungtam_percent": pct(trungtam_count),
+        "congbinh_percent": pct(congbinh_count),
+        "thongtin_percent": pct(thongtin_count),
+        "bienphong_percent": pct(bienphong_count),
+        "daccong_percent": pct(daccong_count),
+        "khongquan_percent": pct(khongquan_count),
+        "haiquan_percent": pct(haiquan_count),
+        "botong_percent": pct(botong_count),
     }
 
 

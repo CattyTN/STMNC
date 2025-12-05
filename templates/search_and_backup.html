@@ -93,7 +93,7 @@ html, body {
                     <td scope="col" class="sort col-2" style="font-size: 12px; background-color: #ff3232;">{{ row['mac'] }}</td>
                     <td scope="col" class="sort col-2" style="font-size: 12px; background-color: #ff3232;">{{ row['time_receive'] }}</td>
                     <td scope="col" class="sort col-4" style="font-size: 12px; background-color: #ff3232;">{{ row['unit_full_name'] }}</td>
-                    <td scope="col" class="sort col-3" style="font-size: 12px; background-color: #ff3232; "><a href="{{ url_for('detail', ioc=row['extracted_ip'], mac=row['mac']) }}" style="color:#2e2434;">{{ row['description'] }} (MiAV)</a></td>
+                    <td scope="col" class="sort col-3" style="font-size: 12px; background-color: #ff3232; "><a href="{{ url_for('detail', ioc=row['extracted_ip'], mac=row['mac']) }}" style="color:#2e2434;">{{ row['description'] }}</a></td>
                   </tr>
                   {%else%}
                   <tr>
@@ -208,7 +208,7 @@ html, body {
                     <th scope="col" class="sort col-2">${ row['MAC'] }</th>
                     <th scope="col" class="sort col-2">${ row['TIME_RECEIVE'] }</th>
                     <th scope="col" class="sort col-3">${ row['UNIT_FULL_NAME'] }</th>
-                    <th scope="col" class="sort col-3">${ row['DESCRIPTION'] } (MiAV)</th>
+                    <th scope="col" class="sort col-3">${ row['DESCRIPTION'] }</th>
                   </tr>`;
           }
               tableBody.append(newRow);
