@@ -1145,8 +1145,6 @@ def login_event():
     logs = logs.fillna("N/A").replace("", "N/A")
 
     total_pages = (len(logs) + 9) // 7   # giữ cách tính như ioc
-    print("------------------------")
-    print(total_pages)
     first_page_data = logs.iloc[:7]
     m = 7
     current_user_role = get_user_role()
@@ -1627,6 +1625,8 @@ def log_login_event(username, status):
     ip = request.headers.get('X-Forwarded-For', '').split(',')[0].strip() or request.remote_addr
     user_agent = request.headers.get('User-Agent', '')
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    print("-------------------------")
+    print(current_time)
 
     login_event_collection.insert_one({
         "username": username,
@@ -1647,12 +1647,12 @@ def login():
         login_user(user)
 
         # Ghi log đăng nhập thành công
-        log_login_event(email, "success")
+        log_login_event(email, "Đăng nhập thành công")
 
         return jsonify({'status': 'success', 'message': 'Đăng nhập thành công'})
     else:
         # Ghi log đăng nhập thất bại
-        log_login_event(email, "failed")
+        log_login_event(email, "Đăng nhập thất bại")
 
         return jsonify({'status': 'error', 'message': 'Email hoặc mật khẩu không đúng'}), 401
 
@@ -1660,12 +1660,50 @@ def login():
 @login_required
 def logout():
     username = current_user.id           # lấy username đang đăng nhập
-    log_login_event(username, "logout")  # ghi log logout
+    log_login_event(username, "Đăng xuất")  # ghi log logout
 
     session.clear()
     logout_user()
 
     return jsonify({'status': 'success', 'message': 'Đăng xuất thành công'})
+
+@app.route('/change_password', methods=['POST'])
+@login_required
+def change_password():
+    data = request.get_json() or {}
+    old_password = data.get("old_password", "")
+    new_password = data.get("new_password", "")
+
+    if not old_password or not new_password:
+        return jsonify({"success": False, "message": "Mật khẩu cũ và mật khẩu mới không được để trống!"}), 400
+
+    username = current_user.id  # key trong users và field 'username' trong Mongo
+
+    # Lấy user từ DB
+    user_doc = user_collection.find_one({"username": username})
+    if not user_doc:
+        return jsonify({"success": False, "message": "Không tìm thấy người dùng!"}), 404
+
+    old_hash = hashlib.sha256(old_password.encode()).hexdigest()
+
+    if user_doc.get("password") != old_hash:
+        return jsonify({"success": False, "message": "Mật khẩu cũ không chính xác!"}), 400
+
+    new_hash = hashlib.sha256(new_password.encode()).hexdigest()
+
+    # Cập nhật vào MongoDB
+    user_collection.update_one(
+        {"username": username},
+        {"$set": {"password": new_hash}}
+    )
+
+    # Cập nhật vào cache 'users' dùng cho login()
+    if username in users:
+        users[username]["password"] = new_hash
+    username = current_user.id           # lấy username đang đăng nhập
+    log_login_event(username, "Đổi mật khẩu")  # ghi log logout
+    return jsonify({"success": True, "message": "Đổi mật khẩu thành công!"})
+
 
 @app.route('/protected')
 @login_required
@@ -1675,6 +1713,9 @@ def protected():
 
 @app.route("/export_report", methods=["POST"])
 def export_report():
+    username = current_user.id           # lấy username đang đăng nhập
+    log_login_event(username, "Xuất báo cáo")
+
     start = request.form.get("from")
     end   = request.form.get("to")
 

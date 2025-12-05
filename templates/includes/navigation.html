@@ -19,16 +19,18 @@
                     <span class="navbar-toggler-bar navbar-kebab"></span>
                     <span class="navbar-toggler-bar navbar-kebab"></span>
                 </button>
-                <div class="collapse navbar-collapse" id="navigation">
-                    <ul class="navbar-nav ml-auto">
-                        <li class="nav-item">
-                            <div class="d-flex align-items-center" style="padding: 8px 16px;">
-                                <div>.</div>
-                            </div>
-                        </li>
-                        <li class="separator d-lg-none"></li>
-                    </ul>
-                </div>
+                    <div class="collapse navbar-collapse" id="navigation">
+                        <ul class="navbar-nav ml-auto">
+                            <li class="nav-item">
+                                <div class="d-flex align-items-center" style="padding: 8px 16px;">
+                                    <a href="#" id="open_change_password_modal" data-toggle="modal" data-target="#changePasswordModal" style="color: black; text-decoration: none;">
+                                        Đổi mật khẩu
+                                    </a>
+                                </div>
+                            </li>
+                            <li class="separator d-lg-none"></li>
+                        </ul>
+                    </div>
             </div>
         </nav>
         <div class="modal modal-search fade" id="searchModal" tabindex="-1" role="dialog" aria-labelledby="searchModal"
@@ -44,5 +46,34 @@
                 </div>
             </div>
         </div>
+
+        <div class="modal fade" id="changePasswordModal" tabindex="-1" role="dialog" aria-labelledby="changePasswordLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="changePasswordLabel">ĐỔI MẬT KHẨU</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span>&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="form-group">
+            <label for="old-password-input" class="col-form-label">Mật khẩu cũ</label>
+            <input type="password" class="form-control" id="old-password-input">
+          </div>
+          <div class="form-group">
+            <label for="new-password-input" class="col-form-label">Mật khẩu mới</label>
+            <input type="password" class="form-control" id="new-password-input">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+        <button type="button" id="change_password_button" class="btn btn-primary">Đổi</button>
+      </div>
+    </div>
+  </div>
+</div>
 
         

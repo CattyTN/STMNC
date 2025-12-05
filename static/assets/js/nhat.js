@@ -1222,3 +1222,66 @@ window.addEventListener('load', function(){
     click_pagination_search_and_backup()
 })
 
+// Đổi mật khẩu
+window.addEventListener('load', function(){
+    change_password_listener()
+});
+
+function change_password_listener() {
+    var btn = document.getElementById("change_password_button");
+    if (!btn) return;
+
+    btn.addEventListener("click", function () {
+        var oldPass = document.getElementById("old-password-input").value.trim();
+        var newPass = document.getElementById("new-password-input").value.trim();
+
+        if (!oldPass || !newPass) {
+            Swal.fire({
+                title: "Thiếu dữ liệu!",
+                text: "Vui lòng nhập đầy đủ mật khẩu cũ và mật khẩu mới.",
+                icon: "warning"
+            });
+            return;
+        }
+
+        fetch("/change_password", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                old_password: oldPass,
+                new_password: newPass
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire({
+                    title: "Thành công!",
+                    text: data.message,
+                    icon: "success"
+                }).then(() => {
+                    // Xóa dữ liệu và đóng modal
+                    document.getElementById("old-password-input").value = "";
+                    document.getElementById("new-password-input").value = "";
+                    $('#changePasswordModal').modal('hide');
+                });
+            } else {
+                Swal.fire({
+                    title: "Lỗi!",
+                    text: data.message || "Không đổi được mật khẩu.",
+                    icon: "error"
+                });
+            }
+        })
+        .catch(error => {
+            console.error("Lỗi gửi dữ liệu:", error);
+            Swal.fire({
+                title: "Lỗi!",
+                text: "Không thể kết nối đến server.",
+                icon: "error"
+            });
+        });
+    });
+}
