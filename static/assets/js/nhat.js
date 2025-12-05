@@ -1694,18 +1694,18 @@ function initExportReportFlow() {
         previewBox.innerHTML = `
             <p><strong>Khoảng thời gian:</strong> ${from} → ${to}</p>
             <hr>
-            <p><strong>Tổng số bản ghi:</strong> ${stats.total_count}</p>
+            <p><strong>Tổng số truy vấn:</strong> ${stats.total_count}</p>
             <p><strong>Bất thường:</strong> ${stats.abnormal_count} (${stats.abnormal_percent})</p>
-            <p><strong>Bình thường:</strong> ${stats.benign_count} (${stats.benign_percent})</p>
+            <p><strong>Thông thường:</strong> ${stats.benign_count} (${stats.benign_percent})</p>
             <hr>
-            <p><strong>Nguồn gây bất thường nhiều nhất:</strong><br>
+            <p><strong>Máy thực hiện nhiều truy vấn nhất:</strong><br>
                 MAC: ${stats.most_source_mac}<br>
                 Tên máy: ${stats.most_source_name}<br>
                 Đơn vị: ${stats.most_source_unit}
             </p>
-            <p><strong>Đích bị tấn công nhiều nhất:</strong> ${stats.most_destination}</p>
+            <p><strong>Địa chỉ IP được kết nối đến nhiều nhất:</strong> ${stats.most_destination}</p>
             <hr>
-            <p><strong>Thống kê theo đơn vị (bản ghi / %):</strong></p>
+            <p><strong>Thống kê theo đầu mối:</strong></p>
             <ul>
                 <li>Quân khu: ${stats.quankhu_count} (${stats.quankhu_percent})</li>
                 <li>Quân đoàn: ${stats.quandoan_count} (${stats.quandoan_percent})</li>
