@@ -1908,7 +1908,7 @@ def export_report():
     doc.save(docx_path)
 
     # Convert DOCX -> PDF bằng LibreOffice (soffice)
-    pdf_path = os.path.join(temp_dir, "baocao.pdf")
+    pdf_path = os.path.join(temp_dir, "report.pdf")
 
     system_os = platform.system().lower()
 

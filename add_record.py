@@ -34,6 +34,26 @@ def set_all_ram_labels_to_zero(collection_name="ram"):
     result = collection.update_many({}, {"$set": {"label": 0}})
 
     print(f"Đã cập nhật {result.modified_count} bản ghi: đặt label = 0.")
+def delete_login_event_invalid(collection_name="login_event"):
+    client = MongoClient(MONGO_URI)
+    db = client[DB_NAME]
+    collection = db[collection_name]
+
+    # Điều kiện xoá:
+    # - time == "N/A"
+    # - status == "success"
+    # - status == "failed"
+    query = {
+        "$or": [
+            {"time": "N/A"},
+            {"status": "success"},
+            {"status": "failed"}
+        ]
+    }
+
+    result = collection.delete_many(query)
+
+    print(f"Đã xóa {result.deleted_count} bản ghi không hợp lệ trong collection '{collection_name}'.")
 
 if __name__ == "__main__":
     # ví dụ: thêm dữ liệu người dùng từ user.xlsx
@@ -41,5 +61,4 @@ if __name__ == "__main__":
     # create_collection("user.xlsx", "user")
 
     # thêm các dòng trong ram_3.xlsx vào collection 'ram'
-    set_all_ram_labels_to_zero("ram")
-    append_ram3_to_db("ram_3.xlsx", "ram")
+    delete_login_event_with_na_time("login_event")
