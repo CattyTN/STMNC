@@ -26,6 +26,14 @@ def append_ram3_to_db(excel_path="ram_3.xlsx", target_collection="ram"):
     result = col.insert_many(data)
     print(f"Đã chèn {len(result.inserted_ids)} bản ghi từ '{excel_path}' vào collection '{target_collection}'.")
 
+def set_all_ram_labels_to_zero(collection_name="ram"):
+    client = MongoClient(MONGO_URI)
+    db = client[DB_NAME]
+    collection = db[collection_name]
+
+    result = collection.update_many({}, {"$set": {"label": 0}})
+
+    print(f"Đã cập nhật {result.modified_count} bản ghi: đặt label = 0.")
 
 if __name__ == "__main__":
     # ví dụ: thêm dữ liệu người dùng từ user.xlsx
@@ -33,4 +41,5 @@ if __name__ == "__main__":
     # create_collection("user.xlsx", "user")
 
     # thêm các dòng trong ram_3.xlsx vào collection 'ram'
+    set_all_ram_labels_to_zero("ram")
     append_ram3_to_db("ram_3.xlsx", "ram")
