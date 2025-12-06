@@ -402,7 +402,6 @@ def ioc_page():
 @login_required
 @admin_required
 def delete_ioc():
-    print("vao ham delete ioc")
     data = request.get_json()
     ioc_id = data.get("id")
 
@@ -410,8 +409,8 @@ def delete_ioc():
         return jsonify({"success": False, "message": "Thiếu ID IOC!"}), 400
 
     result = indicator_collection.delete_one({"id": ioc_id})
-    print("---------------------")
-    print("ioc_id", ioc_id)
+    username_1 = current_user.id           
+    log_login_event(username_1, "Xóa IOC") 
 
     if result.deleted_count == 0:
         return jsonify({"success": False, "message": "Không tìm thấy IOC để xóa!"}), 404
@@ -525,7 +524,6 @@ def relabel_existing_records(ioc_url):
 @app.route('/add_ioc', methods=['GET', 'POST'])
 @login_required
 def add_ioc():
-    print("vao ham add ioc")
     data = request.get_json()
     required_fields = [ "url"]
     for field in required_fields:
@@ -546,6 +544,9 @@ def add_ioc():
     matched_count = relabel_existing_records(data["url"])
     matched_count = relabel_all_search_and_backup(data["url"])
     indicator_collection.insert_one(ioc_data)
+    username = current_user.id           
+    log_login_event(username, "Thêm mới IOC") 
+
     return jsonify({"success": True, "message": "Thêm mới mối đe dọa thành công!"})
         
 
@@ -691,7 +692,8 @@ def add_user():
     }
 
     user_collection.insert_one(user_data)
-
+    username_1 = current_user.id           
+    log_login_event(username_1, "Thêm mới người dùng") 
     return jsonify({"success": True, "message": "Thêm mới người dùng thành công!"})
 
 
@@ -706,6 +708,7 @@ def delete_user():
     if not username:
         return jsonify({"success": False, "message": f"Có lỗi trong quá trình nhận dữ liệu!"})
     result = user_collection.delete_one({"username": data["username"]})
+    log_login_event(username, "Xóa người dùng") 
     return jsonify({"success": True, "message": "Thêm mới mối đe dọa thành công!"})
 
 
@@ -1793,9 +1796,8 @@ def login():
 @app.route('/logout', methods=['POST'])
 @login_required
 def logout():
-    username = current_user.id           # lấy username đang đăng nhập
-    log_login_event(username, "Đăng xuất")  # ghi log logout
-
+    username = current_user.id           
+    log_login_event(username, "Đăng xuất")  
     session.clear()
     logout_user()
 
@@ -1834,8 +1836,8 @@ def change_password():
     # Cập nhật vào cache 'users' dùng cho login()
     if username in users:
         users[username]["password"] = new_hash
-    username = current_user.id           # lấy username đang đăng nhập
-    log_login_event(username, "Đổi mật khẩu")  # ghi log logout
+    username_1 = current_user.id           # lấy username đang đăng nhập
+    log_login_event(username_1, "Đổi mật khẩu")  # ghi log logout
     return jsonify({"success": True, "message": "Đổi mật khẩu thành công!"})
 
 
