@@ -524,31 +524,66 @@ def relabel_existing_records(ioc_url):
 @app.route('/add_ioc', methods=['GET', 'POST'])
 @login_required
 def add_ioc():
-    data = request.get_json()
-    required_fields = [ "url"]
-    for field in required_fields:
-        if field not in data or not data[field]:
-            return jsonify({"success": False, "message": f"Trường {field} không được để trống!"})
+    # Parse JSON an toàn, không nuốt lỗi
+    data = request.get_json(silent=True)
+
+    # Nếu JSON không hợp lệ hoặc không phải object → 400
+    if data is None or not isinstance(data, dict):
+        return Response(status=400)
+
+    # Các trường được phép gửi lên
+    allowed_fields = {
+        "url",
+        "description",
+        "status",
+        "threat",
+        "pattern",
+        "valid_from",
+        "valid_until"
+    }
+
+    # Lấy toàn bộ key gửi lên
+    received_keys = set(map(str, data.keys()))
+
+    # Check nhận key ngoài allowed → reject
+    extra_keys = received_keys - allowed_fields
+    if extra_keys:
+        return Response(status=400)
+
+    # url bắt buộc, không được rỗng
+    url = str(data.get("url", "")).strip()
+    if not url:
+        return Response(status=400)
+
+    # Sinh ID
     generated_id = str(uuid.uuid4())
+
+    # Tạo IOC mới
     ioc_data = {
-        "id": generated_id,  
-        "url": data["url"],
-        "description": data["description"],
+        "id": generated_id,
+        "url": url,
+        "description": data.get("description", ""),
         "status": data.get("status", "N/A"),
-        'reporter': current_user.id,  
+        "reporter": current_user.id,
         "threat": data.get("threat", "N/A"),
         "pattern": data.get("pattern", "N/A"),
         "valid_from": data.get("valid_from", "N/A"),
-        "valid_until": data.get("valid_until", "N/A")
+        "valid_until": data.get("valid_until", "N/A"),
     }
-    matched_count = relabel_existing_records(data["url"])
-    matched_count = relabel_all_search_and_backup(data["url"])
-    indicator_collection.insert_one(ioc_data)
-    username = current_user.id           
-    log_login_event(username, "Thêm mới IOC") 
 
-    return jsonify({"success": True, "message": "Thêm mới mối đe dọa thành công!"})
-        
+    # Gọi relabel
+    relabel_existing_records(url)
+    relabel_all_search_and_backup(url)
+
+    # Lưu DB
+    indicator_collection.insert_one(ioc_data)
+
+    log_login_event(current_user.id, "Thêm mới IOC")
+
+    return jsonify({
+        "success": True,
+        "message": "Thêm mới mối đe dọa thành công!"
+    }), 200   
 
 @app.route('/reset_search', methods=['POST'])
 @login_required
@@ -665,22 +700,21 @@ def add_user():
     data = request.get_json()
     required_fields = ["username", "password", "unit", "role"]
 
+    # Nếu số lượng trường khác 4 → lỗi 400, không message
+    if len(data.keys()) != len(required_fields):
+        return Response(status=400)
+
     # Kiểm tra thiếu dữ liệu
     for field in required_fields:
-        if field not in data or not data[field].strip():
-            return jsonify({"success": False, "message": f"Trường {field} không được để trống!"})
+        if field not in data or not str(data[field]).strip():
+            return Response(status=400)
 
     username = data["username"].strip()
 
-    # KIỂM TRA username đã tồn tại chưa
     existed = user_collection.find_one({"username": username})
     if existed:
-        return jsonify({
-            "success": False,
-            "message": "Người dùng đã tồn tại trong hệ thống!"
-        })
+        return Response(status=400)
 
-    # Hash password
     hash_password = hashlib.sha256(data['password'].encode()).hexdigest()
 
     user_data = {
@@ -692,9 +726,10 @@ def add_user():
     }
 
     user_collection.insert_one(user_data)
-    username_1 = current_user.id           
-    log_login_event(username_1, "Thêm mới người dùng") 
-    return jsonify({"success": True, "message": "Thêm mới người dùng thành công!"})
+
+    log_login_event(current_user.id, "Thêm mới người dùng")
+
+    return jsonify({"success": True, "message": "Thêm mới người dùng thành công!"}), 200
 
 
 @app.route('/delete_user', methods=['GET', 'POST'])
@@ -702,14 +737,35 @@ def add_user():
 @login_required
 @admin_required
 def delete_user():
-    data = request.get_json()
-    username = data["username"]
-    print(username)
+    # Lấy JSON an toàn
+    data = request.get_json(silent=True)
+
+    # Body phải là dict
+    if not isinstance(data, dict):
+        return Response(status=400)
+
+    # Chỉ chấp nhận đúng 1 field: username
+    if set(data.keys()) != {"username"}:
+        return Response(status=400)
+
+    username = str(data.get("username", "")).strip()
     if not username:
-        return jsonify({"success": False, "message": f"Có lỗi trong quá trình nhận dữ liệu!"})
-    result = user_collection.delete_one({"username": data["username"]})
-    log_login_event(username, "Xóa người dùng") 
-    return jsonify({"success": True, "message": "Thêm mới mối đe dọa thành công!"})
+        return Response(status=400)
+
+    result = user_collection.delete_one({"username": username})
+
+    if result.deleted_count == 0:
+        return jsonify({
+            "success": False,
+            "message": "Không tìm thấy người dùng để xóa!"
+        }), 404
+
+    log_login_event(username, "Xóa người dùng")
+
+    return jsonify({
+        "success": True,
+        "message": "Xóa người dùng thành công!"
+    }), 200
 
 
 @app.route('/update_user', methods=['POST'])
@@ -743,13 +799,22 @@ def index():
     update_chart()
     update_parameter_stats()
     records = get_record()
-    #print(len(records))
     month_list, month_count = get_monthly_record_counts(records)
     df_1, df_2 = get_dashboard_parameter()
     df_1_json = df_1.to_dict(orient='records')
-    #print(df_1)
+
+    top_units = get_top_units_from_ram()  # <<< thêm dòng này
+
     current_user_role = get_user_role()
-    return render_template('index.html',df_1_json=df_1_json, df_2 = df_2, month_list = month_list, month_count = month_count, current_user_role=current_user_role)
+    return render_template(
+        'index.html',
+        df_1_json=df_1_json,
+        df_2=df_2,
+        month_list=month_list,
+        month_count=month_count,
+        top_units=top_units,             # <<< và thêm biến này
+        current_user_role=current_user_role
+    )
 
 def update_parameter_stats():
     total_query = ram_collection.count_documents({})
@@ -773,7 +838,42 @@ def update_parameter_stats():
         "ioc_db": total_ioc_db
     }
 
+def get_top_units_from_ram():
+    """
+    Tính TOP 5 đơn vị có số lượng truy vấn lớn nhất trong ram_collection,
+    dùng đúng bộ keyword bạn cung cấp.
+    """
+    df = get_record()  # lấy dữ liệu từ ram_collection
+    if df.empty or "unit_full_name" not in df.columns:
+        return []
 
+    total = len(df)
+    unit_series = df["unit_full_name"].fillna("")
+
+    # GIỮ NGUYÊN BỘ KEYWORD GỐC
+    mapping = [
+        ("Qan Khu 5",  "zugn ku 5"),
+        ("TCHC",       "hậu cần"),
+        ("BCTTLL",     "liên lạc"),
+        ("Trung tam 3","86"),
+        ("PKKQ",       "PKKQ"),
+        ("QCHQ",       "Hải zugn"),
+    ]
+
+    def pct(count):
+        return f"{round(count * 100.0 / total, 2):.2f} %"
+
+    rows = []
+    for name, key in mapping:
+        c = unit_series.str.contains(key, case=False, na=False).sum()
+        rows.append({
+            "name": name,
+            "count": int(c),
+            "percent": pct(c),
+        })
+
+    rows.sort(key=lambda r: r["count"], reverse=True)
+    return rows[:5]
 
 def update_chart():
     df = get_record()
@@ -862,28 +962,44 @@ def search_and_backup_page():
 
 @app.route('/search_keyword', methods=['POST'])
 def search_keyword():
-    data = request.get_json()
-    keyword = data.get('keyword', '').lower()
+    data = request.get_json(silent=True)
 
-    # Lấy document của người dùng hiện tại
+    if data is None or not isinstance(data, dict):
+        return Response(status=400)
+
+    if set(data.keys()) != {"keyword"}:
+        return Response(status=400)
+
+    keyword = str(data.get("keyword", "")).strip()
+    if not keyword:
+        return Response(status=400)
+
+    keyword = keyword.lower()
+
     record = search_and_backup_collection.find_one({"user_id": current_user.id})
-
     if not record or "data" not in record:
-        return jsonify({"success": False, "message": "Không tìm thấy dữ liệu để tìm kiếm."}), 404
+        return jsonify({
+            "success": False,
+            "message": "Không tìm thấy dữ liệu để tìm kiếm."
+        }), 404
 
-    # Tìm kiếm trong 'data' gốc
     df = pd.DataFrame(record["data"])
-    mask = df.apply(lambda row: row.astype(str).str.lower().str.contains(keyword).any(), axis=1)
+    mask = df.apply(
+        lambda row: row.astype(str).str.lower().str.contains(keyword).any(),
+        axis=1
+    )
     filtered_df = df[mask]
 
-    # Cập nhật searched_data nếu có kết quả
     if len(filtered_df) > 0:
         search_and_backup_collection.update_one(
             {"user_id": current_user.id},
             {"$set": {"searched_data": filtered_df.to_dict(orient="records")}}
         )
 
-    return jsonify({"success": True, "message": f"Tìm thấy {len(filtered_df)} bản ghi!"})
+    return jsonify({
+        "success": True,
+        "message": f"Tìm thấy {len(filtered_df)} bản ghi!"
+    }), 200
 
 #def search_keyword():
 #    data = request.get_json()

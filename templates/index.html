@@ -23,6 +23,18 @@
     border: none !important;
     box-shadow: 0 6px 12px rgba(0,0,0,0.2) !important;
 }
+.top5-table th, 
+.top5-table td {
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+    vertical-align: middle !important;
+    font-size: 12px;
+}
+
+.top5-table {
+    margin-bottom: 0 !important;
+}
+
 </style>
 {% endblock stylesheets %}
 
@@ -87,10 +99,51 @@
                     </div>
                 </div>
             </div>
+
             <div class="col-lg-7">
                 <div class="card card-chart">
                     <div class="card-header">
-                        <h5 class="card-category" style="color:black"><strong>TOP MÁY CÓ SỐ LƯỢNG TRUY VẤN LỚN</strong></h5>
+                        <h5 class="card-category" style="color:black">
+                            <strong>TOP 5 ĐƠN VỊ CÓ SỐ LƯỢNG TRUY VẤN LỚN NHẤT</strong>
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-sm top5-table">
+    <thead>
+        <tr>
+            <th style="color:black" class="text-center">ĐƠN VỊ</th>
+            <th style="color:black" class="text-center">SỐ LƯỢT TRUY VẤN</th>
+            <th style="color:black" class="text-center">TỈ LỆ</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in top_units %}
+        <tr>
+            <td style="color:black" class="text-center">{{ row.name }}</td>
+            <td style="color:black" class="text-center">{{ row.count }}</td>
+            <td style="color:black" class="text-center">{{ row.percent }}</td>
+        </tr>
+        {% endfor %}
+        {% if top_units|length == 0 %}
+        <tr>
+            <td colspan="3" class="text-center">Không có dữ liệu</td>
+        </tr>
+        {% endif %}
+    </tbody>
+</table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="card card-chart">
+                    <div class="card-header">
+                        <h5 class="card-category" style="color:black">
+                            <strong>TOP MÁY CÓ SỐ LƯỢT TRUY VẤN LỚN</strong>
+                        </h5>
                     </div>
                     <div class="card-body">
                         <div class="chart-area">
@@ -99,10 +152,7 @@
                     </div>
                 </div>
             </div>
-
         </div>
-
-
     </div>
 
 {% endblock content %}

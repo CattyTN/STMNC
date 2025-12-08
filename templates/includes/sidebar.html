@@ -204,16 +204,30 @@
       <button type="button" id="export_close" class="export-close">&times;</button>
     </div>
     <div class="export-modal-body">
+      <!-- Chọn loại báo cáo -->
       <div class="form-group">
-        <label style="font-size: 16px;" for="export_from">Từ ngày</label>
-        <!-- dùng input text để gắn Tempus Dominus (giống GIÁM SÁT) -->
-        <input type="text" id="export_from" class="form-control" placeholder="YYYY-MM-DD HH:MM:SS">
+        <label style="font-size: 16px;" for="export_type">Chọn loại thống kê</label>
+        <select id="export_type" class="form-control">
+          <option value="time">Thống kê theo khoảng thời gian</option>
+          <option value="unit">Thống kê theo đầu mối</option>
+          <option value="device">Thống kê theo máy tính</option>
+          <option value="behavior">Thống kê theo hành vi</option>
+        </select>
       </div>
-      <div class="form-group">
-        <label style="font-size: 16px;" for="export_to">Đến ngày</label>
-        <input type="text" id="export_to" class="form-control" placeholder="YYYY-MM-DD HH:MM:SS">
+
+      <!-- Khối chọn thời gian: chỉ hiện khi chọn "theo khoảng thời gian" -->
+      <div id="export_time_range">
+        <div class="form-group">
+          <label style="font-size: 16px;" for="export_from">Từ ngày</label>
+          <input type="text" id="export_from" class="form-control" placeholder="YYYY-MM-DD HH:MM:SS">
+        </div>
+        <div class="form-group">
+          <label style="font-size: 16px;" for="export_to">Đến ngày</label>
+          <input type="text" id="export_to" class="form-control" placeholder="YYYY-MM-DD HH:MM:SS">
+        </div>
       </div>
     </div>
+
     <div class="export-modal-footer">
       <button type="button" class="btn btn-secondary" id="export_cancel">Hủy</button>
       <button type="button" class="btn btn-primary" id="export_confirm">Xuất</button>
@@ -225,7 +239,7 @@
 <div id="exportPreviewModal" class="export-modal">
   <div class="export-modal-dialog">
     <div class="export-modal-header">
-      <h5>Thống kê báo cáo</h5>
+      <h3>Thống kê báo cáo</h3>
       <button type="button" id="export_preview_close" class="export-close">&times;</button>
     </div>
     <div class="export-modal-body">
