@@ -239,7 +239,7 @@ def get_user_role():
     return None
 
 
-loop_active = False
+#loop_active = False
 user_path = "user.xlsx"
 black_list_path = "black_list.xlsx"
 miav_database_path = "miav_database.xlsx"
@@ -2236,7 +2236,7 @@ def compute_report_stats(start_date, end_date):
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True, use_reloader=False)
 #investigate_ip_stmnc('45.125.66.56')
 #print(get_relationship())
 
